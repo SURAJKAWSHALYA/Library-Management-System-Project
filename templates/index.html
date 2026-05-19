@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Library Management System</h1>
+            <p>Manage your book collection efficiently</p>
+        </header>
+
+        <main>
+            <section class="welcome">
+                <h2>Welcome to Your Library</h2>
+                <p>Organize, track, and manage all your books in one place. Keep track of titles, authors, ISBN numbers, and inventory.</p>
+            </section>
+
+            <section class="features">
+                <h2>What You Can Do</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>� View Dashboard</h3>
+                        <p>Get an overview of your library with statistics, recent additions, and quick actions.</p>
+                        <a href="/dashboard" class="btn btn-primary">View Dashboard</a>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📖 View Books</h3>
+                        <p>Browse through all books in your library with detailed information about each title.</p>
+                        <a href="/books" class="btn btn-primary">View All Books</a>
+                    </div>
+                    <div class="feature-card">
+                        <h3>➕ Add New Book</h3>
+                        <p>Add new books to your collection with title, author, ISBN, year published, and quantity.</p>
+                        <a href="/add" class="btn btn-success">Add Book</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="quick-links">
+                <h2>Quick Access</h2>
+                <ul>
+                    <li><a href="/dashboard">View Dashboard</a></li>
+                    <li><a href="/books">View Library Books</a></li>
+                    <li><a href="/add">Add New Book to Library</a></li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Library Management System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

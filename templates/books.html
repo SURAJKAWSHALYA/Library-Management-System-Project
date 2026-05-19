@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Library Books</h1>
+            <p>All books in your collection</p>
+        </header>
+
+        <nav class="navbar">
+            <a href="/" class="btn btn-secondary">Home</a>
+            <a href="/add" class="btn btn-success">Add New Book</a>
+        </nav>
+
+        <main>
+            {% if books %}
+            <section class="books-section">
+                <h2>Total Books: {{ books|length }}</h2>
+                <div class="books-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>ISBN</th>
+                                <th>Year Published</th>
+                                <th>Quantity</th>
+                                <th>Added On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr>
+                                <td>{{ book.id }}</td>
+                                <td>{{ book.title }}</td>
+                                <td>{{ book.author }}</td>
+                                <td>{{ book.isbn if book.isbn else 'N/A' }}</td>
+                                <td>{{ book.year_published if book.year_published else 'N/A' }}</td>
+                                <td><span class="badge">{{ book.quantity }}</span></td>
+                                <td>{{ book.created_at.strftime('%Y-%m-%d %H:%M') if book.created_at else 'N/A' }}</td>
+                                <td class="action-buttons">
+                                    <form method="POST" action="/delete/{{ book.id }}" class="delete-form" style="display: inline;">
+                                        <button type="submit" class="btn btn-delete btn-sm" onclick="return confirmDelete('{{ book.title }}');">🗑️ Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            {% else %}
+            <section class="empty-state">
+                <h2>No Books Found</h2>
+                <p>Your library is empty. Start by adding your first book!</p>
+                <a href="/add" class="btn btn-success">Add Your First Book</a>
+            </section>
+            {% endif %}
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Library Management System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

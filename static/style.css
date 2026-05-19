@@ -1,0 +1,803 @@
+/* ==============================
+   General Styles
+   ============================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f7fa;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ==============================
+   Header & Footer
+   ============================== */
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 0;
+    text-align: center;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+
+main {
+    flex: 1;
+    margin-bottom: 40px;
+}
+
+footer {
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 50px;
+    border-radius: 8px;
+}
+
+footer p {
+    margin: 0;
+}
+
+/* ==============================
+   Navigation
+   ============================== */
+.navbar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.navbar a {
+    display: inline-block;
+}
+
+/* ==============================
+   Buttons
+   ============================== */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background-color: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #5568d3;
+}
+
+.btn-success {
+    background-color: #48bb78;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #38a169;
+}
+
+.btn-secondary {
+    background-color: #718096;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #4a5568;
+}
+
+.btn-delete {
+    background-color: #f56565;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #e53e3e;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.delete-form {
+    margin: 0;
+}
+
+/* ==============================
+   Cards & Sections
+   ============================== */
+section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+section h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 10px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.feature-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border-left: 5px solid #667eea;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.feature-card h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.feature-card p {
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.feature-card .btn {
+    width: 100%;
+    text-align: center;
+}
+
+/* ==============================
+   Welcome Section
+   ============================== */
+.welcome {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+}
+
+.welcome h2 {
+    color: white;
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.welcome p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+
+/* ==============================
+   Quick Links
+   ============================== */
+.quick-links ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.quick-links li {
+    background: #f0f4ff;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #667eea;
+}
+
+.quick-links a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.quick-links a:hover {
+    color: #764ba2;
+}
+
+/* ==============================
+   Forms
+   ============================== */
+.form-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.book-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.form-control {
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.form-actions .btn {
+    flex: 1;
+    text-align: center;
+}
+
+/* ==============================
+   Tables
+   ============================== */
+.books-table {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table thead {
+    background-color: #667eea;
+    color: white;
+}
+
+table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+table td {
+    padding: 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+table tbody tr:hover {
+    background-color: #f5f7fa;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+/* ==============================
+   Badge
+   ============================== */
+.badge {
+    display: inline-block;
+    background-color: #48bb78;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 35px;
+}
+
+/* ==============================
+   Empty State
+   ============================== */
+.empty-state {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    text-align: center;
+    padding: 60px 30px;
+}
+
+.empty-state h2 {
+    color: #2c3e50;
+    border-bottom: none;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #555;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.empty-state .btn {
+    display: inline-block;
+}
+
+/* ==============================
+   Responsive Design
+   ============================== */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    header p {
+        font-size: 1rem;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    section {
+        padding: 20px;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    table th,
+    table td {
+        padding: 10px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .navbar {
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ==============================
+   Dashboard Styles
+   ============================== */
+.stats-section {
+    margin-bottom: 40px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    border-left: 5px solid #667eea;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    min-width: 60px;
+    text-align: center;
+}
+
+.stat-content h3 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.stat-number {
+    font-size: 2rem;
+    color: #667eea;
+    font-weight: 700;
+    margin: 8px 0;
+}
+
+.stat-label {
+    color: #718096;
+    font-size: 0.85rem;
+}
+
+/* ==============================
+   Actions Section
+   ============================== */
+.actions-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.action-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+}
+
+.action-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+}
+
+.action-icon {
+    font-size: 2.5rem;
+}
+
+.action-card h4 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.action-card p {
+    font-size: 0.9rem;
+    opacity: 0.95;
+    margin: 0;
+}
+
+/* ==============================
+   Recent Books Section
+   ============================== */
+.recent-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.recent-books-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.book-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.book-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+    transform: translateY(-3px);
+}
+
+.book-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 10px;
+}
+
+.book-header h4 {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 1.1rem;
+    flex: 1;
+}
+
+.book-badge {
+    background: #48bb78;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.book-author {
+    color: #667eea;
+    font-style: italic;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.book-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-item {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.detail-item strong {
+    color: #2c3e50;
+}
+
+.qty-badge {
+    background: #667eea;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.book-date {
+    color: #718096;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.book-delete {
+    margin-top: 8px;
+}
+
+/* ==============================
+   Info Section
+   ============================== */
+.info-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.info-card h4 {
+    color: #2c3e50;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+}
+
+.info-card p {
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ==============================
+   Empty Section
+   ============================== */
+.empty-section {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    text-align: center;
+    padding: 60px 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+}
+
+.empty-section h2 {
+    color: #2c3e50;
+    border-bottom: none;
+    margin-bottom: 15px;
+}
+
+.empty-section p {
+    color: #555;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+/* ==============================
+   Responsive Dashboard
+   ============================== */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-content h3 {
+        margin-top: 10px;
+    }
+
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .recent-books-container {
+        grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 20px;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+    }
+
+    .action-icon {
+        font-size: 2rem;
+    }
+
+    .book-header {
+        flex-direction: column;
+    }
+
+    .book-badge {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    header {
+        padding: 25px 0;
+        margin-bottom: 20px;
+    }
+
+    section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    section h2 {
+        font-size: 1.3rem;
+    }
+
+    table {
+        font-size: 0.8rem;
+    }
+
+    table th,
+    table td {
+        padding: 8px;
+    }
+
+    .feature-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .feature-card p {
+        font-size: 0.95rem;
+    }
+}

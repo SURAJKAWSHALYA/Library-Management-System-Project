@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Library Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Dashboard</h1>
+            <p>Library Overview & Statistics</p>
+        </header>
+
+        <nav class="navbar">
+            <a href="/" class="btn btn-secondary">Home</a>
+            <a href="/books" class="btn btn-secondary">View Books</a>
+            <a href="/add" class="btn btn-success">Add New Book</a>
+        </nav>
+
+        <main>
+            <!-- Statistics Cards -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <!-- Total Books Card -->
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-content">
+                            <h3>Total Books</h3>
+                            <p class="stat-number">{{ total_books }}</p>
+                            <span class="stat-label">Books in collection</span>
+                        </div>
+                    </div>
+
+                    <!-- Total Authors Card -->
+                    <div class="stat-card">
+                        <div class="stat-icon">✍️</div>
+                        <div class="stat-content">
+                            <h3>Authors</h3>
+                            <p class="stat-number">{{ total_authors }}</p>
+                            <span class="stat-label">Unique authors</span>
+                        </div>
+                    </div>
+
+                    <!-- Total Quantity Card -->
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-content">
+                            <h3>Total Quantity</h3>
+                            <p class="stat-number">{{ total_quantity }}</p>
+                            <span class="stat-label">Books in stock</span>
+                        </div>
+                    </div>
+
+                    <!-- Average Quantity Card -->
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <h3>Avg. Per Book</h3>
+                            <p class="stat-number">{{ avg_quantity }}</p>
+                            <span class="stat-label">Average quantity</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="actions-section">
+                <h2>Quick Actions</h2>
+                <div class="actions-grid">
+                    <a href="/add" class="action-card">
+                        <div class="action-icon">➕</div>
+                        <h4>Add New Book</h4>
+                        <p>Add a new book to your library</p>
+                    </a>
+                    <a href="/books" class="action-card">
+                        <div class="action-icon">📖</div>
+                        <h4>Browse Library</h4>
+                        <p>View all books in your collection</p>
+                    </a>
+                    <a href="/books?sort=recent" class="action-card">
+                        <div class="action-icon">⏰</div>
+                        <h4>Recently Added</h4>
+                        <p>View recently added books</p>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Recent Books Section -->
+            {% if recent_books %}
+            <section class="recent-section">
+                <h2>Recently Added Books</h2>
+                <div class="recent-books-container">
+                    {% for book in recent_books %}
+                    <div class="book-card">
+                        <div class="book-header">
+                            <h4>{{ book.title }}</h4>
+                            <span class="book-badge">New</span>
+                        </div>
+                        <p class="book-author">by {{ book.author }}</p>
+                        <div class="book-details">
+                            <span class="detail-item">
+                                <strong>ISBN:</strong> {{ book.isbn if book.isbn else 'N/A' }}
+                            </span>
+                            <span class="detail-item">
+                                <strong>Year:</strong> {{ book.year_published if book.year_published else 'N/A' }}
+                            </span>
+                            <span class="detail-item">
+                                <strong>Qty:</strong> <span class="qty-badge">{{ book.quantity }}</span>
+                            </span>
+                        </div>
+                        <p class="book-date">Added: {{ book.created_at.strftime('%b %d, %Y') if book.created_at else 'N/A' }}</p>
+                        <form method="POST" action="/delete/{{ book.id }}" class="book-delete" style="display: inline;">
+                            <button type="submit" class="btn btn-delete btn-sm" onclick="return confirmDelete('{{ book.title }}');">Delete</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% else %}
+            <section class="empty-section">
+                <h2>No Books Yet</h2>
+                <p>Your library is empty. Add your first book to get started!</p>
+                <a href="/add" class="btn btn-success">Add First Book</a>
+            </section>
+            {% endif %}
+
+            <!-- Library Stats Info -->
+            <section class="info-section">
+                <h2>Library Information</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>📊 Collection Size</h4>
+                        <p>Your library currently contains <strong>{{ total_books }}</strong> unique titles with a total of <strong>{{ total_quantity }}</strong> copies.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>✍️ Author Diversity</h4>
+                        <p>You have books from <strong>{{ total_authors }}</strong> different authors, providing a diverse reading collection.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>📦 Inventory Status</h4>
+                        <p>{% if total_books > 0 %}You have an average of <strong>{{ avg_quantity }}</strong> copies per title.{% else %}Start building your inventory by adding books.{% endif %}</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Library Management System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
