@@ -20,6 +20,7 @@ function initializeApp() {
     setupAnimations();
     setupDeleteFunctionality();
     setupDashboardAnimations();
+    setupThemeToggle();
 }
 
 // ==============================
@@ -461,6 +462,64 @@ function setupDashboardAnimations() {
             card.style.transform = 'translateX(0)';
         }, index * 100 + 700);
     });
+}
+
+// ==============================
+// Theme Toggle - Dark Mode
+// ==============================
+function setupThemeToggle() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    
+    if (!themeToggle) return;
+    
+    // Get saved theme from localStorage, default to 'light'
+    const savedTheme = localStorage.getItem('bs-theme') || 'light';
+    body.setAttribute('data-bs-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+    
+    // Theme toggle button click
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = body.getAttribute('data-bs-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        // Update theme
+        body.setAttribute('data-bs-theme', newTheme);
+        localStorage.setItem('bs-theme', newTheme);
+        
+        // Update icon
+        updateThemeIcon(newTheme);
+        
+        // Show notification
+        showThemeNotification(newTheme);
+    });
+}
+
+// ==============================
+// Update Theme Icon
+// ==============================
+function updateThemeIcon(theme) {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (!themeToggle) return;
+    
+    const icon = themeToggle.querySelector('i');
+    if (theme === 'dark') {
+        icon.classList.remove('bi-moon-fill');
+        icon.classList.add('bi-sun-fill');
+        themeToggle.title = 'Switch to Light Mode';
+    } else {
+        icon.classList.remove('bi-sun-fill');
+        icon.classList.add('bi-moon-fill');
+        themeToggle.title = 'Switch to Dark Mode';
+    }
+}
+
+// ==============================
+// Show Theme Notification
+// ==============================
+function showThemeNotification(theme) {
+    const message = theme === 'dark' ? '🌙 Dark Mode Enabled' : '☀️ Light Mode Enabled';
+    createNotification(message, 'success');
 }
 
 // ==============================
