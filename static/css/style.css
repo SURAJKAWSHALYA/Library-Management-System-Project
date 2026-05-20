@@ -98,12 +98,13 @@ html, body {
     margin: 0;
     font-weight: 600;
     font-size: 0.95rem;
+    color: white;
 }
 
 .user-role {
     margin: 0.25rem 0 0 0;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.8);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -297,6 +298,27 @@ html, body {
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    /* ===== THEME TOGGLE BUTTON ===== */
+
+    #theme-toggle {
+        background-color: #f8f9fa;
+        color: #333;
+        border: 2px solid #dee2e6 !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    #theme-toggle:hover {
+        background-color: #e9ecef;
+        border-color: var(--primary-color) !important;
+        color: var(--primary-color);
+        transform: scale(1.1);
+    }
+
     color: white;
 }
 
