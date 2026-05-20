@@ -188,6 +188,15 @@ html, body {
     padding: 0;
 }
 
+.top-navbar .navbar-text,
+.top-navbar .nav-link {
+    color: #333;
+}
+
+.top-navbar .nav-link:hover {
+    color: #000;
+}
+
 .navbar-text {
     color: #333;
     font-weight: 500;
