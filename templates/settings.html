@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="page-header">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <h1><i class="fas fa-cog"></i> Settings</h1>
+        <p class="text-muted">Manage your account and preferences</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Profile Settings -->
+            <div class="content-card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-user"></i> Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation">
+                        <input type="hidden" name="action" value="update_profile">
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="{{ user['username'] }}" disabled>
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" required value="{{ user['full_name'] }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required value="{{ user['email'] }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Account Type</label>
+                            <input type="text" class="form-control" id="role" value="{{ user['role']|capitalize }}" disabled>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Password Settings -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-lock"></i> Change Password</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation">
+                        <input type="hidden" name="action" value="change_password">
+                        
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Current Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                            <small class="text-muted">Minimum 6 characters</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="content-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Account Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-box">
+                        <strong>Member Since</strong>
+                        <p>{{ user['created_at'][:10] if user['created_at'] else 'N/A' }}</p>
+                    </div>
+                    <div class="info-box">
+                        <strong>Account Status</strong>
+                        <p><span class="badge bg-success">Active</span></p>
+                    </div>
+                    <div class="info-box">
+                        <strong>Account Type</strong>
+                        <p><span class="badge bg-primary">{{ user['role']|capitalize }}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-shield-alt"></i> Security Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-check text-success"></i> Use a strong password</li>
+                        <li><i class="fas fa-check text-success"></i> Change password regularly</li>
+                        <li><i class="fas fa-check text-success"></i> Never share your credentials</li>
+                        <li><i class="fas fa-check text-success"></i> Logout from shared devices</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .info-box {
+        padding: 1rem;
+        background: rgba(102, 126, 234, 0.08);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .info-box strong {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+    }
+
+    .info-box p {
+        margin: 0;
+        color: #666;
+    }
+</style>
+{% endblock %}

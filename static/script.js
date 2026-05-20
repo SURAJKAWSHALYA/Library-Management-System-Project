@@ -386,7 +386,7 @@ style.textContent = `
             opacity: 0;
         }
     }
-
+ 
     @keyframes fadeIn {
         from {
             opacity: 0;

@@ -33,7 +33,7 @@
                         <a class="nav-link active" href="/books">Books</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/add">Add Book</a>
+                        <a class="nav-link" href="{{ url_for('add_book') }}">Add Book</a>
                     </li>
                     <li class="nav-item">
                         <button class="btn btn-outline-secondary ms-2" id="theme-toggle" title="Toggle Dark Mode">
@@ -69,7 +69,7 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Total Books: <span class="badge bg-primary">{{ books|length }}</span></h5>
-                            <a href="/add" class="btn btn-sm btn-success"><i class="bi bi-plus"></i> Add Book</a>
+                            <a href="{{ url_for('add_book') }}" class="btn btn-sm btn-success"><i class="bi bi-plus"></i> Add Book</a>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -95,10 +95,10 @@
                                             <td><code>{{ book.isbn if book.isbn else 'N/A' }}</code></td>
                                             <td>{{ book.year_published if book.year_published else 'N/A' }}</td>
                                             <td><span class="badge bg-primary">{{ book.quantity }}</span></td>
-                                            <td><small class="text-muted">{{ book.created_at.strftime('%b %d, %Y') if book.created_at else 'N/A' }}</small></td>
+                                            <td><small class="text-muted">{{ (book.created_at|parse_dt).strftime('%b %d, %Y') if book.created_at else 'N/A' }}</small></td>
                                             <td>
-                                                <form method="POST" action="/delete/{{ book.id }}" class="delete-form" style="display: inline;">
-                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmDelete('{{ book.title }}')">
+                                                <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}" class="delete-form" style="display: inline;">
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete {{ book.title }}?')">
                                                         <i class="bi bi-trash"></i> Delete
                                                     </button>
                                                 </form>
@@ -119,7 +119,7 @@
                         <div class="mb-3"><i class="bi bi-inbox" style="font-size: 3rem; color: #0c63e4;"></i></div>
                         <h4>📭 No Books Found</h4>
                         <p class="text-muted mb-3">Your library is empty. Start by adding your first book!</p>
-                        <a href="/add" class="btn btn-success"><i class="bi bi-plus"></i> Add Your First Book</a>
+                        <a href="{{ url_for('add_book') }}" class="btn btn-success"><i class="bi bi-plus"></i> Add Your First Book</a>
                     </div>
                 </div>
             </div>

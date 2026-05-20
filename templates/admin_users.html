@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="page-header">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <h1><i class="fas fa-users"></i> User Management</h1>
+        <p class="text-muted">Manage library users and their accounts</p>
+    </div>
+
+    <div class="table-responsive content-card">
+        {% if users %}
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_item in users %}
+                        <tr>
+                            <td><strong>{{ user_item['username'] }}</strong></td>
+                            <td>{{ user_item['full_name'] }}</td>
+                            <td>{{ user_item['email'] }}</td>
+                            <td>
+                                <span class="badge {% if user_item['role'] == 'admin' %}bg-danger{% else %}bg-primary{% endif %}">
+                                    {{ user_item['role']|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ (user_item['created_at']|parse_dt).strftime('%b %d, %Y') if user_item['created_at'] else 'N/A' }}</td>
+                            <td>
+                                {% if user_item['id'] != user_id %}
+                                    <form method="POST" action="{{ url_for('delete_user', user_id=user_item['id']) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete user {{ user_item['username'] }}?')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="badge bg-secondary">Current User</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No users found</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

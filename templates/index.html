@@ -33,7 +33,7 @@
                         <a class="nav-link" href="/books">Books</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/add">Add Book</a>
+                        <a class="nav-link" href="{{ url_for('add_book') }}">Add Book</a>
                     </li>
                     <li class="nav-item">
                         <button class="btn btn-outline-secondary ms-2" id="theme-toggle" title="Toggle Dark Mode">
@@ -88,7 +88,7 @@
                             <div class="display-6 mb-3">➕</div>
                             <h5 class="card-title">Add New Book</h5>
                             <p class="card-text text-muted">Add books to your collection easily.</p>
-                            <a href="/add" class="btn btn-success">Add Book</a>
+                            <a href="{{ url_for('add_book') }}" class="btn btn-success">Add Book</a>
                         </div>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item border-0"><a href="/dashboard" class="text-decoration-none">📊 View Dashboard</a></li>
                                 <li class="list-group-item border-0"><a href="/books" class="text-decoration-none">📖 View Library Books</a></li>
-                                <li class="list-group-item border-0"><a href="/add" class="text-decoration-none">➕ Add New Book to Library</a></li>
+                                <li class="list-group-item border-0"><a href="{{ url_for('add_book') }}" class="text-decoration-none">➕ Add New Book to Library</a></li>
                             </ul>
                         </div>
                     </div>

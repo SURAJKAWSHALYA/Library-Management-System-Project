@@ -4,59 +4,167 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Library Management System{% endblock %}</title>
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_css %}{% endblock %}
 </head>
-<body data-bs-theme="light">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom sticky-top" id="main-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <span class="fs-5">📚 Library Management</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <i class="fas fa-book-reader"></i>
+                <h1>LMS</h1>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-times"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/books">Books</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/add">Add Book</a>
-                    </li>
-                    <li class="nav-item">
-                        <button class="btn btn-outline-secondary ms-2" id="theme-toggle" title="Toggle Dark Mode">
-                            <i class="bi bi-moon-fill"></i>
-                        </button>
-                    </li>
-                </ul>
+        </div>
+
+        {% if user_id %}
+        <div class="user-profile">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-info">
+                <p class="user-name">{{ full_name }}</p>
+                <p class="user-role">{{ role|capitalize }}</p>
             </div>
         </div>
+        {% endif %}
+
+        <ul class="nav-menu">
+            {% if user_id %}
+                <li class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'view_books' %}active{% endif %}">
+                    <a href="{{ url_for('view_books') }}" class="nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>View Books</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'add_book' %}active{% endif %}">
+                    <a href="{{ url_for('add_book') }}" class="nav-link">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Add Book</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'borrow_book' %}active{% endif %}">
+                    <a href="{{ url_for('borrow_book') }}" class="nav-link">
+                        <i class="fas fa-download"></i>
+                        <span>Borrow Book</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'return_book' %}active{% endif %}">
+                    <a href="{{ url_for('return_book') }}" class="nav-link">
+                        <i class="fas fa-upload"></i>
+                        <span>Return Book</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'history' %}active{% endif %}">
+                    <a href="{{ url_for('history') }}" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </a>
+                </li>
+
+                {% if role == 'admin' %}
+                <li class="nav-divider"></li>
+                <li class="nav-item-title">Admin Panel</li>
+                <li class="nav-item {% if request.endpoint == 'admin_users' %}active{% endif %}">
+                    <a href="{{ url_for('admin_users') }}" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="nav-divider"></li>
+                <li class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}">
+                    <a href="{{ url_for('settings') }}" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ url_for('logout') }}" class="nav-link text-danger">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
     </nav>
 
-    <main class="py-4">
-        {% block content %}{% endblock %}
-    </main>
+    <!-- Main Content -->
+    <div class="main-container">
+        {% if user_id %}
+        <nav class="navbar navbar-expand-lg navbar-dark top-navbar">
+            <div class="container-fluid">
+                <button class="btn btn-link" id="sidebarToggleBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="navbar-text ms-3">
+                    <i class="fas fa-home"></i> Home
+                </span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('settings') }}">
+                                <i class="fas fa-user-circle"></i> {{ full_name }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        {% endif %}
 
-    <footer class="bg-light border-top mt-5 py-4">
-        <div class="container text-center">
-            <p class="text-muted mb-0">&copy; 2026 Library Management System. All rights reserved.</p>
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container-fluid mt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        <div class="page-content">
+            {% block content %}{% endblock %}
         </div>
-    </footer>
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

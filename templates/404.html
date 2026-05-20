@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Page Not Found{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="text-center">
+        <div style="font-size: 5rem; color: #667eea; margin-bottom: 1rem;">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 1rem;">404</h1>
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Page Not Found</h2>
+        <p style="font-size: 1.1rem; color: #666; margin-bottom: 2rem;">
+            Sorry, the page you're looking for doesn't exist or has been moved.
+        </p>
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary me-2">
+                <i class="fas fa-home"></i> Go to Dashboard
+            </a>
+            <a href="{{ url_for('view_books') }}" class="btn btn-outline-primary">
+                <i class="fas fa-book"></i> View Books
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Return Book - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="page-header">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <h1><i class="fas fa-upload"></i> Return a Book</h1>
+        <p class="text-muted">Return your borrowed books to the library</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="content-card">
+                <div class="card-body">
+                    {% if borrowed %}
+                        <form method="POST" class="needs-validation">
+                            <div class="mb-3">
+                                <label for="borrow_id" class="form-label">Select Book to Return <span class="text-danger">*</span></label>
+                                <select name="borrow_id" id="borrow_id" class="form-select" required>
+                                    <option value="">-- Choose a book --</option>
+                                    {% for borrow in borrowed %}
+                                        <option value="{{ borrow['id'] }}">
+                                            {{ borrow['title'] }} - Due: {{ (borrow['due_date']|parse_dt).strftime('%b %d, %Y') if borrow['due_date'] else 'N/A' }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="d-flex gap-2 pt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check"></i> Confirm Return
+                                </button>
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> You don't have any borrowed books at this time
+                        </div>
+                        <a href="{{ url_for('borrow_book') }}" class="btn btn-primary">
+                            <i class="fas fa-book"></i> Borrow a Book
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            {% if borrowed %}
+            <div class="content-card">
+                <div class="card-header">
+                    <h5>Your Borrowed Books</h5>
+                </div>
+                <div class="card-body">
+                    <div class="borrowed-list">
+                        {% for borrow in borrowed %}
+                            <div class="borrowed-item">
+                                <h6>{{ borrow['title'] }}</h6>
+                                <p class="text-muted">{{ borrow['author'] }}</p>
+                                <small class="text-danger">Due: {{ (borrow['due_date']|parse_dt).strftime('%b %d, %Y') if borrow['due_date'] else 'N/A' }}</small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="content-card">
+                <div class="card-header">
+                    <h5>Return Process</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="ps-3">
+                        <li>Select the book to return</li>
+                        <li>Click "Confirm Return"</li>
+                        <li>Fine will be calculated if late</li>
+                        <li>Book will be marked returned</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .borrowed-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .borrowed-item:last-child {
+        border-bottom: none;
+    }
+
+    .borrowed-item h6 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.95rem;
+    }
+
+    .borrowed-item p {
+        margin: 0.25rem 0;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}

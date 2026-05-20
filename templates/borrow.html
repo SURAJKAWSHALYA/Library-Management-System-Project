@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Borrow Book - Library Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="page-header">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <h1><i class="fas fa-download"></i> Borrow a Book</h1>
+        <p class="text-muted">Select a book to borrow from the library</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="content-card">
+                <div class="card-body">
+                    {% if books %}
+                        <form method="POST" class="needs-validation">
+                            <div class="mb-3">
+                                <label for="book_id" class="form-label">Select Book <span class="text-danger">*</span></label>
+                                <select name="book_id" id="book_id" class="form-select" required>
+                                    <option value="">-- Choose a book --</option>
+                                    {% for book in books %}
+                                        <option value="{{ book['id'] }}">
+                                            {{ book['title'] }} by {{ book['author'] }} ({{ book['quantity'] }} available)
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="borrow_days" class="form-label">Borrow Period (Days) <span class="text-danger">*</span></label>
+                                <input type="number" name="borrow_days" id="borrow_days" class="form-control" value="14" min="1" max="30" required>
+                                <small class="text-muted">Maximum 30 days, late fine Rs. 10/day</small>
+                            </div>
+
+                            <div class="d-flex gap-2 pt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check"></i> Confirm Borrow
+                                </button>
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No books available for borrowing at this time
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="content-card">
+                <div class="card-header">
+                    <h5>Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Maximum 30 days per borrow</li>
+                        <li><i class="fas fa-clock text-warning"></i> Late fee: Rs. 10 per day</li>
+                        <li><i class="fas fa-ban text-danger"></i> Cannot borrow duplicate books</li>
+                        <li><i class="fas fa-book text-info"></i> Check history for due dates</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
