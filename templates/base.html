@@ -95,6 +95,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item {% if request.endpoint == 'librarian_borrow_requests' %}active{% endif %}">
+                    <a href="{{ url_for('librarian_borrow_requests') }}" class="nav-link">
+                        <i class="fas fa-envelope-open-text"></i>
+                        <span>Borrow Requests</span>
+                    </a>
+                </li>
+
                 <li class="nav-item {% if request.endpoint == 'history' %}active{% endif %}">
                     <a href="{{ url_for('history') }}" class="nav-link">
                         <i class="fas fa-history"></i>

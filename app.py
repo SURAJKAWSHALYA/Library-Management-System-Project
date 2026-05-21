@@ -385,6 +385,15 @@ def librarian_dashboard():
         WHERE status = "borrowed" AND due_date < CURRENT_TIMESTAMP
     ''').fetchone()['count']
     
+    # Get pending requests
+    pending_requests = db.execute('''
+        SELECT bh.*, b.title, b.author, u.full_name FROM borrow_history bh
+        JOIN books b ON bh.book_id = b.id
+        JOIN users u ON bh.user_id = u.id
+        WHERE bh.status = "requested"
+        ORDER BY bh.borrow_date ASC LIMIT 5
+    ''').fetchall()
+
     # Get pending returns
     pending_returns = db.execute('''
         SELECT bh.*, b.title, u.full_name FROM borrow_history bh
@@ -409,9 +418,66 @@ def librarian_dashboard():
                          available_books=available_books,
                          borrowed_books=borrowed_books,
                          overdue_books=overdue_books,
+                         pending_requests=pending_requests,
                          pending_returns=pending_returns,
                          recent_books=recent_books,
                          categories=categories)
+
+@app.route('/librarian/borrow-requests')
+@librarian_required
+def librarian_borrow_requests():
+    """View and manage pending borrower requests"""
+    db = get_db()
+    requests = db.execute('''
+        SELECT bh.*, b.title, b.author, u.full_name FROM borrow_history bh
+        JOIN books b ON bh.book_id = b.id
+        JOIN users u ON bh.user_id = u.id
+        WHERE bh.status = "requested"
+        ORDER BY bh.borrow_date ASC
+    ''').fetchall()
+    db.close()
+    return render_template('librarian/borrow_requests.html', requests=requests)
+
+@app.route('/librarian/approve-request/<int:request_id>', methods=['POST'])
+@librarian_required
+def approve_request(request_id):
+    db = get_db()
+    request_row = db.execute('SELECT * FROM borrow_history WHERE id = ? AND status = "requested"', (request_id,)).fetchone()
+    if not request_row:
+        db.close()
+        flash('Request not found or already processed', 'danger')
+        return redirect(url_for('librarian_borrow_requests'))
+
+    book = db.execute('SELECT * FROM books WHERE id = ?', (request_row['book_id'],)).fetchone()
+    if not book or book['quantity'] <= 0:
+        db.close()
+        flash('Book is not available to issue', 'warning')
+        return redirect(url_for('librarian_borrow_requests'))
+
+    db.execute('UPDATE borrow_history SET status = "borrowed" WHERE id = ?', (request_id,))
+    db.execute('UPDATE books SET quantity = quantity - 1 WHERE id = ?', (book['id'],))
+    db.commit()
+    db.close()
+    log_activity(session['user_id'], 'Approve Request', f'Approved book request ID: {request_id} for {book["title"]}')
+    flash('Request approved and book issued', 'success')
+    return redirect(url_for('librarian_borrow_requests'))
+
+@app.route('/librarian/decline-request/<int:request_id>', methods=['POST'])
+@librarian_required
+def decline_request(request_id):
+    db = get_db()
+    request_row = db.execute('SELECT bh.*, b.title FROM borrow_history bh JOIN books b ON bh.book_id = b.id WHERE bh.id = ? AND bh.status = "requested"', (request_id,)).fetchone()
+    if not request_row:
+        db.close()
+        flash('Request not found or already processed', 'danger')
+        return redirect(url_for('librarian_borrow_requests'))
+
+    db.execute('DELETE FROM borrow_history WHERE id = ?', (request_id,))
+    db.commit()
+    db.close()
+    log_activity(session['user_id'], 'Decline Request', f'Declined book request ID: {request_id} for {request_row["title"]}')
+    flash('Request declined successfully', 'info')
+    return redirect(url_for('librarian_borrow_requests'))
 
 @app.route('/student/dashboard')
 @login_required
@@ -508,6 +574,15 @@ def view_books():
     
     # Get categories for filter
     categories = db.execute('SELECT DISTINCT category FROM books ORDER BY category').fetchall()
+
+    role = session.get('role', 'user')
+    requested_book_ids = []
+    if role in ['user', 'student']:
+        requested_rows = db.execute(
+            'SELECT book_id FROM borrow_history WHERE user_id = ? AND status IN ("requested", "borrowed")',
+            (session['user_id'],)
+        ).fetchall()
+        requested_book_ids = [row['book_id'] for row in requested_rows]
     
     db.close()
     
@@ -519,7 +594,53 @@ def view_books():
                          total_pages=total_pages,
                          search=search,
                          category=category,
-                         categories=categories)
+                         categories=categories,
+                         role=role,
+                         requested_book_ids=requested_book_ids)
+
+@app.route('/request-book', methods=['POST'])
+@student_required
+def request_book():
+    """Student requests a book for librarian approval"""
+    book_id = request.form.get('book_id', 0, type=int)
+    borrow_days = request.form.get('borrow_days', 14, type=int)
+    
+    if borrow_days < 1 or borrow_days > 30:
+        flash('Request period must be between 1 and 30 days', 'danger')
+        return redirect(url_for('view_books'))
+    
+    db = get_db()
+    book = db.execute('SELECT * FROM books WHERE id = ?', (book_id,)).fetchone()
+    if not book:
+        db.close()
+        flash('Book not found', 'danger')
+        return redirect(url_for('view_books'))
+    
+    if book['quantity'] <= 0:
+        db.close()
+        flash('Book is currently unavailable', 'warning')
+        return redirect(url_for('view_books'))
+    
+    existing = db.execute(
+        'SELECT COUNT(*) as count FROM borrow_history WHERE user_id = ? AND book_id = ? AND status IN ("requested", "borrowed")',
+        (session['user_id'], book_id)
+    ).fetchone()['count']
+    
+    if existing > 0:
+        db.close()
+        flash('You have already requested or borrowed this book', 'warning')
+        return redirect(url_for('view_books'))
+    
+    due_date = datetime.now() + timedelta(days=borrow_days)
+    db.execute(
+        'INSERT INTO borrow_history (user_id, book_id, due_date, status) VALUES (?, ?, ?, "requested")',
+        (session['user_id'], book_id, due_date)
+    )
+    db.commit()
+    db.close()
+    log_activity(session['user_id'], 'Request Book', f'Requested book: {book["title"]}')
+    flash('Your request has been submitted to the librarian', 'success')
+    return redirect(url_for('view_books'))
 
 @app.route('/add-book', methods=['GET', 'POST'])
 @librarian_required

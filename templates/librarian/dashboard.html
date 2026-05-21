@@ -101,6 +101,48 @@
         </div>
     </div>
 
+    <!-- Pending Requests -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">Pending Borrow Requests</h3>
+                <a href="{{ url_for('librarian_borrow_requests') }}" class="btn btn-sm btn-primary">View All Requests</a>
+            </div>
+            <div class="card mb-4">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Book Title</th>
+                                <th>Requested Days</th>
+                                <th>Requested On</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if pending_requests %}
+                                {% for item in pending_requests %}
+                                <tr>
+                                    <td><strong>{{ item['full_name'] }}</strong></td>
+                                    <td>{{ item['title'] }}</td>
+                                    <td>{{ ((item['due_date']|parse_dt) - (item['borrow_date']|parse_dt)).days }}</td>
+                                    <td>{{ item['borrow_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
+                                    <td><span class="badge bg-warning">Requested</span></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No pending borrow requests</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Pending Actions -->
     <div class="row mt-5">
         <div class="col-md-12">

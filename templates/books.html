@@ -69,7 +69,9 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Total Books: <span class="badge bg-primary">{{ books|length }}</span></h5>
+                            {% if role == 'librarian' %}
                             <a href="{{ url_for('add_book') }}" class="btn btn-sm btn-success"><i class="bi bi-plus"></i> Add Book</a>
+                            {% endif %}
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -97,11 +99,29 @@
                                             <td><span class="badge bg-primary">{{ book.quantity }}</span></td>
                                             <td><small class="text-muted">{{ (book.created_at|parse_dt).strftime('%b %d, %Y') if book.created_at else 'N/A' }}</small></td>
                                             <td>
-                                                <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}" class="delete-form" style="display: inline;">
-                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete {{ book.title }}?')">
-                                                        <i class="bi bi-trash"></i> Delete
-                                                    </button>
-                                                </form>
+                                                {% if role in ['user', 'student'] %}
+                                                    {% if book.quantity > 0 %}
+                                                        {% if book.id in requested_book_ids %}
+                                                            <span class="badge bg-info">Requested</span>
+                                                        {% else %}
+                                                            <form method="POST" action="{{ url_for('request_book') }}" class="d-flex gap-1">
+                                                                <input type="hidden" name="book_id" value="{{ book.id }}">
+                                                                <input type="hidden" name="borrow_days" value="14">
+                                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                                    <i class="bi bi-send"></i> Request
+                                                                </button>
+                                                            </form>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Unavailable</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}" class="delete-form" style="display: inline;">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete {{ book.title }}?')">
+                                                            <i class="bi bi-trash"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                         {% endfor %}
