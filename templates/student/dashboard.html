@@ -60,23 +60,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-book fa-3x text-success mb-3"></i>
-                    <h5 class="card-title">Borrow Book</h5>
-                    <p class="card-text small">Request to borrow a book</p>
-                    <a href="{{ url_for('borrow_book') }}" class="btn btn-success btn-sm">Borrow</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-undo fa-3x text-info mb-3"></i>
-                    <h5 class="card-title">Return Book</h5>
-                    <p class="card-text small">Return borrowed books</p>
-                    <a href="{{ url_for('return_book') }}" class="btn btn-info btn-sm">Return</a>
+        <div class="col-md-8 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Borrow & Return Restrictions</h5>
+                    <p class="card-text">Only librarians can perform borrow and return operations. If you need a book issued or returned, please contact your library staff.</p>
+                    <p class="text-muted small">This keeps admin, student, and user panels separate from librarian-only library actions.</p>
                 </div>
             </div>
         </div>
@@ -113,7 +102,9 @@
                                                 </span>
                                             </small>
                                         </div>
-                                        <a href="{{ url_for('return_book') }}" class="btn btn-sm btn-primary">Return Book</a>
+                                        <div class="alert alert-warning py-2">
+                                            <small>Return processing is handled by the librarian.</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

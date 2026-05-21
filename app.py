@@ -189,7 +189,7 @@ def librarian_required(f):
         user = db.execute('SELECT role FROM users WHERE id = ?', (session['user_id'],)).fetchone()
         db.close()
         
-        if not user or user['role'] not in ['librarian', 'admin']:
+        if not user or user['role'] != 'librarian':
             flash('Librarian access required', 'danger')
             return redirect(url_for('dashboard'))
         
@@ -640,7 +640,7 @@ def delete_book(book_id):
 # ==================== BORROW/RETURN ROUTES ====================
 
 @app.route('/borrow-book', methods=['GET', 'POST'])
-@login_required
+@librarian_required
 def borrow_book():
     """Borrow a book"""
     db = get_db()
@@ -699,7 +699,7 @@ def borrow_book():
     return render_template('borrow.html', books=books)
 
 @app.route('/return-book', methods=['GET', 'POST'])
-@login_required
+@librarian_required
 def return_book():
     """Return a borrowed book"""
     db = get_db()
