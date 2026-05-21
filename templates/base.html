@@ -41,17 +41,63 @@
 
         <ul class="nav-menu">
             {% if user_id %}
-                <li class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <!-- Dashboard - Dynamic based on role -->
+                <li class="nav-item {% if request.endpoint in ['admin_dashboard', 'librarian_dashboard', 'student_dashboard', 'dashboard'] %}active{% endif %}">
                     <a href="{{ url_for('dashboard') }}" class="nav-link">
                         <i class="fas fa-chart-line"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
 
+                <!-- Admin Panel Navigation -->
+                {% if role == 'admin' %}
+                <li class="nav-divider"></li>
+                <li class="nav-item-title">Admin Panel</li>
+                
+                <li class="nav-item {% if request.endpoint == 'admin_users' %}active{% endif %}">
+                    <a href="{{ url_for('admin_users') }}" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Manage Users</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'add_librarian' %}active{% endif %}">
+                    <a href="{{ url_for('add_librarian') }}" class="nav-link">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Add Librarian</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'manage_categories' %}active{% endif %}">
+                    <a href="{{ url_for('manage_categories') }}" class="nav-link">
+                        <i class="fas fa-list"></i>
+                        <span>Categories</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'admin_reports' %}active{% endif %}">
+                    <a href="{{ url_for('admin_reports') }}" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'admin_borrowed_books' %}active{% endif %}">
+                    <a href="{{ url_for('admin_borrowed_books') }}" class="nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>All Borrowings</span>
+                    </a>
+                </li>
+
+                <!-- Librarian Panel Navigation -->
+                {% elif role == 'librarian' %}
+                <li class="nav-divider"></li>
+                <li class="nav-item-title">Librarian Panel</li>
+
                 <li class="nav-item {% if request.endpoint == 'view_books' %}active{% endif %}">
                     <a href="{{ url_for('view_books') }}" class="nav-link">
                         <i class="fas fa-book"></i>
-                        <span>View Books</span>
+                        <span>Browse Books</span>
                     </a>
                 </li>
 
@@ -59,6 +105,46 @@
                     <a href="{{ url_for('add_book') }}" class="nav-link">
                         <i class="fas fa-plus-circle"></i>
                         <span>Add Book</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'student_records' %}active{% endif %}">
+                    <a href="{{ url_for('student_records') }}" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Student Records</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'calculate_fines' %}active{% endif %}">
+                    <a href="{{ url_for('calculate_fines') }}" class="nav-link">
+                        <i class="fas fa-money-bill"></i>
+                        <span>Fines</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'borrow_book' %}active{% endif %}">
+                    <a href="{{ url_for('borrow_book') }}" class="nav-link">
+                        <i class="fas fa-download"></i>
+                        <span>Issue Book</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if request.endpoint == 'return_book' %}active{% endif %}">
+                    <a href="{{ url_for('return_book') }}" class="nav-link">
+                        <i class="fas fa-upload"></i>
+                        <span>Accept Return</span>
+                    </a>
+                </li>
+
+                <!-- Student Panel Navigation -->
+                {% else %}
+                <li class="nav-divider"></li>
+                <li class="nav-item-title">Student Panel</li>
+
+                <li class="nav-item {% if request.endpoint == 'view_books' %}active{% endif %}">
+                    <a href="{{ url_for('view_books') }}" class="nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>Browse Books</span>
                     </a>
                 </li>
 
@@ -80,16 +166,6 @@
                     <a href="{{ url_for('history') }}" class="nav-link">
                         <i class="fas fa-history"></i>
                         <span>History</span>
-                    </a>
-                </li>
-
-                {% if role == 'admin' %}
-                <li class="nav-divider"></li>
-                <li class="nav-item-title">Admin Panel</li>
-                <li class="nav-item {% if request.endpoint == 'admin_users' %}active{% endif %}">
-                    <a href="{{ url_for('admin_users') }}" class="nav-link">
-                        <i class="fas fa-users"></i>
-                        <span>Users</span>
                     </a>
                 </li>
                 {% endif %}

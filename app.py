@@ -31,7 +31,30 @@ def parse_datetime(dt_string):
             return dt_string
     return dt_string
 
+def datetime_to_timestamp(dt):
+    """Convert datetime to timestamp"""
+    if isinstance(dt, str):
+        dt = parse_datetime(dt)
+    if isinstance(dt, datetime):
+        return int(dt.timestamp())
+    return int(dt)
+
+def get_current_datetime():
+    """Get current datetime"""
+    return datetime.now()
+
+def format_datetime(value, format_string='%Y-%m-%d %H:%M:%S'):
+    """Format datetime to string"""
+    if isinstance(value, str):
+        value = parse_datetime(value)
+    if isinstance(value, datetime):
+        return value.strftime(format_string)
+    return value
+
 app.jinja_env.filters['parse_dt'] = parse_datetime
+app.jinja_env.filters['as_timestamp'] = datetime_to_timestamp
+app.jinja_env.filters['strftime'] = format_datetime
+app.jinja_env.globals['now'] = get_current_datetime()
 
 # ==================== DATABASE FUNCTIONS ====================
 
@@ -154,6 +177,44 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def librarian_required(f):
+    """Decorator to require librarian role"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login first', 'warning')
+            return redirect(url_for('login'))
+        
+        db = get_db()
+        user = db.execute('SELECT role FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+        db.close()
+        
+        if not user or user['role'] not in ['librarian', 'admin']:
+            flash('Librarian access required', 'danger')
+            return redirect(url_for('dashboard'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+def student_required(f):
+    """Decorator to require student/user role"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login first', 'warning')
+            return redirect(url_for('login'))
+        
+        db = get_db()
+        user = db.execute('SELECT role FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+        db.close()
+        
+        if not user or user['role'] not in ['user', 'student']:
+            flash('Student access required', 'danger')
+            return redirect(url_for('dashboard'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
 def log_activity(user_id, action, details=''):
     """Log user activity"""
     db = get_db()
@@ -255,44 +316,158 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    """Main dashboard"""
+    """Main dashboard - shows different content based on user role"""
+    role = session.get('role', 'user')
+    db = get_db()
+    
+    # Route to role-specific dashboard
+    if role == 'admin':
+        return redirect(url_for('admin_dashboard'))
+    elif role == 'librarian':
+        return redirect(url_for('librarian_dashboard'))
+    else:
+        return redirect(url_for('student_dashboard'))
+
+@app.route('/admin/dashboard')
+@admin_required
+def admin_dashboard():
+    """Admin Dashboard - System overview and administration"""
     db = get_db()
     
     # Get statistics
     total_books = db.execute('SELECT COUNT(*) as count FROM books').fetchone()['count']
-    total_users = db.execute('SELECT COUNT(*) as count FROM users').fetchone()['count']
+    total_users = db.execute('SELECT COUNT(*) as count FROM users WHERE role IN ("user", "student")').fetchone()['count']
+    total_librarians = db.execute('SELECT COUNT(*) as count FROM users WHERE role = "librarian"').fetchone()['count']
+    total_admins = db.execute('SELECT COUNT(*) as count FROM users WHERE role = "admin"').fetchone()['count']
     borrowed_books = db.execute('SELECT COUNT(*) as count FROM borrow_history WHERE status = "borrowed"').fetchone()['count']
-    total_authors = db.execute('SELECT COUNT(DISTINCT author) as count FROM books').fetchone()['count']
     total_quantity = db.execute('SELECT SUM(quantity) as count FROM books').fetchone()['count'] or 0
-    avg_quantity = round(total_quantity / total_books, 2) if total_books > 0 else 0
     
-    # Get recently added books
-    recent_books = db.execute(
-        'SELECT * FROM books ORDER BY created_at DESC LIMIT 5'
-    ).fetchall()
+    # Get pending fines
+    pending_fines = db.execute('SELECT COUNT(*) as count FROM fines WHERE paid = 0').fetchone()['count']
+    total_fines = db.execute('SELECT SUM(fine_amount) as total FROM fines WHERE paid = 0').fetchone()['total'] or 0
     
-    # Get user's recent activity
-    recent_borrows = db.execute(
-        '''SELECT b.*, books.title, books.author 
-           FROM borrow_history b 
-           JOIN books ON b.book_id = books.id 
-           WHERE b.user_id = ? 
-           ORDER BY b.borrow_date DESC 
-           LIMIT 5''',
-        (session['user_id'],)
-    ).fetchall()
+    # Get categories
+    categories = db.execute('SELECT DISTINCT category FROM books ORDER BY category').fetchall()
+    
+    # Get recent activity
+    recent_activity = db.execute('''
+        SELECT al.*, u.full_name FROM activity_log al
+        JOIN users u ON al.user_id = u.id
+        ORDER BY al.created_at DESC LIMIT 10
+    ''').fetchall()
     
     db.close()
     
-    return render_template('dashboard.html',
+    return render_template('admin/dashboard.html',
                          total_books=total_books,
                          total_users=total_users,
+                         total_librarians=total_librarians,
+                         total_admins=total_admins,
                          borrowed_books=borrowed_books,
-                         total_authors=total_authors,
                          total_quantity=total_quantity,
-                         avg_quantity=avg_quantity,
+                         pending_fines=pending_fines,
+                         total_fines=total_fines,
+                         categories=categories,
+                         recent_activity=recent_activity)
+
+@app.route('/librarian/dashboard')
+@librarian_required
+def librarian_dashboard():
+    """Librarian Dashboard - Book operations and management"""
+    db = get_db()
+    
+    # Get statistics
+    total_books = db.execute('SELECT COUNT(*) as count FROM books').fetchone()['count']
+    available_books = db.execute('SELECT COUNT(*) as count FROM books WHERE quantity > 0').fetchone()['count']
+    borrowed_books = db.execute('SELECT COUNT(*) as count FROM borrow_history WHERE status = "borrowed"').fetchone()['count']
+    overdue_books = db.execute('''
+        SELECT COUNT(*) as count FROM borrow_history 
+        WHERE status = "borrowed" AND due_date < CURRENT_TIMESTAMP
+    ''').fetchone()['count']
+    
+    # Get pending returns
+    pending_returns = db.execute('''
+        SELECT bh.*, b.title, u.full_name FROM borrow_history bh
+        JOIN books b ON bh.book_id = b.id
+        JOIN users u ON bh.user_id = u.id
+        WHERE bh.status = "borrowed" AND bh.due_date < CURRENT_TIMESTAMP
+        ORDER BY bh.due_date ASC LIMIT 5
+    ''').fetchall()
+    
+    # Get recently added books
+    recent_books = db.execute('''
+        SELECT * FROM books ORDER BY created_at DESC LIMIT 5
+    ''').fetchall()
+    
+    # Get categories
+    categories = db.execute('SELECT DISTINCT category FROM books ORDER BY category').fetchall()
+    
+    db.close()
+    
+    return render_template('librarian/dashboard.html',
+                         total_books=total_books,
+                         available_books=available_books,
+                         borrowed_books=borrowed_books,
+                         overdue_books=overdue_books,
+                         pending_returns=pending_returns,
                          recent_books=recent_books,
-                         recent_borrows=recent_borrows)
+                         categories=categories)
+
+@app.route('/student/dashboard')
+@login_required
+def student_dashboard():
+    """Student/User Dashboard - Personal library activities"""
+    db = get_db()
+    
+    # Get user statistics
+    borrowed_count = db.execute(
+        'SELECT COUNT(*) as count FROM borrow_history WHERE user_id = ? AND status = "borrowed"',
+        (session['user_id'],)
+    ).fetchone()['count']
+    
+    returned_count = db.execute(
+        'SELECT COUNT(*) as count FROM borrow_history WHERE user_id = ? AND status = "returned"',
+        (session['user_id'],)
+    ).fetchone()['count']
+    
+    # Get pending fines
+    pending_fines = db.execute(
+        'SELECT COUNT(*) as count FROM fines WHERE user_id = ? AND paid = 0',
+        (session['user_id'],)
+    ).fetchone()['count']
+    
+    total_fine_amount = db.execute(
+        'SELECT SUM(fine_amount) as total FROM fines WHERE user_id = ? AND paid = 0',
+        (session['user_id'],)
+    ).fetchone()['total'] or 0
+    
+    # Get currently borrowed books
+    borrowed_books = db.execute('''
+        SELECT bh.*, b.title, b.author, b.cover_image
+        FROM borrow_history bh
+        JOIN books b ON bh.book_id = b.id
+        WHERE bh.user_id = ? AND bh.status = "borrowed"
+        ORDER BY bh.due_date ASC
+    ''', (session['user_id'],)).fetchall()
+    
+    # Get recent history
+    recent_history = db.execute('''
+        SELECT bh.*, b.title, b.author
+        FROM borrow_history bh
+        JOIN books b ON bh.book_id = b.id
+        WHERE bh.user_id = ?
+        ORDER BY bh.borrow_date DESC LIMIT 5
+    ''', (session['user_id'],)).fetchall()
+    
+    db.close()
+    
+    return render_template('student/dashboard.html',
+                         borrowed_count=borrowed_count,
+                         returned_count=returned_count,
+                         pending_fines=pending_fines,
+                         total_fine_amount=total_fine_amount,
+                         borrowed_books=borrowed_books,
+                         recent_history=recent_history)
 
 # ==================== BOOK MANAGEMENT ROUTES ====================
 
@@ -347,7 +522,7 @@ def view_books():
                          categories=categories)
 
 @app.route('/add-book', methods=['GET', 'POST'])
-@login_required
+@librarian_required
 def add_book():
     """Add new book"""
     if request.method == 'POST':
@@ -388,7 +563,7 @@ def add_book():
     return render_template('add_book.html')
 
 @app.route('/edit-book/<int:book_id>', methods=['GET', 'POST'])
-@login_required
+@librarian_required
 def edit_book(book_id):
     """Edit existing book"""
     db = get_db()
@@ -435,7 +610,7 @@ def edit_book(book_id):
     return render_template('edit_book.html', book=book)
 
 @app.route('/delete-book/<int:book_id>', methods=['POST'])
-@login_required
+@librarian_required
 def delete_book(book_id):
     """Delete book"""
     db = get_db()
@@ -695,11 +870,75 @@ def settings():
 @admin_required
 def admin_users():
     """Admin: Manage users"""
+    page = request.args.get('page', 1, type=int)
+    role_filter = request.args.get('role', '').strip()
+    
     db = get_db()
-    users = db.execute('SELECT * FROM users ORDER BY created_at DESC').fetchall()
+    
+    # Build query
+    query = 'SELECT * FROM users WHERE 1=1'
+    params = []
+    
+    if role_filter:
+        query += ' AND role = ?'
+        params.append(role_filter)
+    
+    # Get total count
+    count_query = f'SELECT COUNT(*) as count FROM ({query})'
+    total_users = db.execute(count_query, params).fetchone()['count']
+    
+    # Pagination
+    per_page = 10
+    offset = (page - 1) * per_page
+    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?'
+    params.extend([per_page, offset])
+    
+    users = db.execute(query, params).fetchall()
     db.close()
     
-    return render_template('admin_users.html', users=users)
+    total_pages = (total_users + per_page - 1) // per_page
+    
+    return render_template('admin/users.html',
+                         users=users,
+                         page=page,
+                         total_pages=total_pages,
+                         role_filter=role_filter)
+
+@app.route('/admin/add-librarian', methods=['GET', 'POST'])
+@admin_required
+def add_librarian():
+    """Admin: Add librarian"""
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        full_name = request.form.get('full_name', '').strip()
+        
+        # Validation
+        if not all([username, email, password, full_name]):
+            flash('All fields are required', 'danger')
+            return redirect(url_for('add_librarian'))
+        
+        if len(password) < 6:
+            flash('Password must be at least 6 characters', 'danger')
+            return redirect(url_for('add_librarian'))
+        
+        db = get_db()
+        try:
+            db.execute(
+                'INSERT INTO users (username, email, password, full_name, role) VALUES (?, ?, ?, ?, "librarian")',
+                (username, email, generate_password_hash(password), full_name)
+            )
+            db.commit()
+            log_activity(session['user_id'], 'Add Librarian', f'Added librarian: {full_name}')
+            flash('Librarian added successfully!', 'success')
+            return redirect(url_for('admin_users'))
+        except sqlite3.IntegrityError:
+            flash('Username or email already exists', 'danger')
+        finally:
+            db.close()
+    
+    return render_template('admin/add_librarian.html')
 
 @app.route('/admin/delete-user/<int:user_id>', methods=['POST'])
 @admin_required
@@ -724,14 +963,282 @@ def delete_user(user_id):
         db.execute('DELETE FROM fines WHERE user_id = ?', (user_id,))
         db.execute('DELETE FROM borrow_history WHERE user_id = ?', (user_id,))
         db.execute('DELETE FROM activity_log WHERE user_id = ?', (user_id,))
+        user = db.execute('SELECT full_name FROM users WHERE id = ?', (user_id,)).fetchone()
         db.execute('DELETE FROM users WHERE id = ?', (user_id,))
         db.commit()
         
-        log_activity(session['user_id'], 'Delete User', f'Deleted user ID: {user_id}')
+        log_activity(session['user_id'], 'Delete User', f'Deleted user: {user["full_name"]}')
         flash('User deleted successfully!', 'success')
     
     db.close()
     return redirect(url_for('admin_users'))
+
+@app.route('/admin/manage-categories', methods=['GET', 'POST'])
+@admin_required
+def manage_categories():
+    """Admin: Manage book categories"""
+    if request.method == 'POST':
+        action = request.form.get('action', '')
+        
+        if action == 'add':
+            category = request.form.get('category', '').strip()
+            
+            if not category:
+                flash('Category name is required', 'danger')
+                return redirect(url_for('manage_categories'))
+            
+            db = get_db()
+            # Check if category already exists
+            existing = db.execute('SELECT COUNT(*) as count FROM books WHERE category = ?', (category,)).fetchone()['count']
+            
+            if existing > 0:
+                flash('Category already exists', 'warning')
+            else:
+                # Add a placeholder book to create the category (or just store in settings later)
+                flash('You can use this category when adding books', 'success')
+            db.close()
+    
+    db = get_db()
+    categories = db.execute('SELECT DISTINCT category FROM books ORDER BY category').fetchall()
+    db.close()
+    
+    return render_template('admin/manage_categories.html', categories=categories)
+
+@app.route('/admin/reports')
+@admin_required
+def admin_reports():
+    """Admin: View reports"""
+    db = get_db()
+    
+    # Borrowing Report
+    borrowing_report = db.execute('''
+        SELECT b.title, COUNT(*) as times_borrowed
+        FROM borrow_history bh
+        JOIN books b ON bh.book_id = b.id
+        GROUP BY bh.book_id
+        ORDER BY times_borrowed DESC
+        LIMIT 10
+    ''').fetchall()
+    
+    # User Activity Report
+    user_activity = db.execute('''
+        SELECT u.full_name, COUNT(*) as activities
+        FROM activity_log al
+        JOIN users u ON al.user_id = u.id
+        GROUP BY al.user_id
+        ORDER BY activities DESC
+        LIMIT 10
+    ''').fetchall()
+    
+    # Overdue Report
+    overdue_report = db.execute('''
+        SELECT u.full_name, b.title, bh.due_date
+        FROM borrow_history bh
+        JOIN users u ON bh.user_id = u.id
+        JOIN books b ON bh.book_id = b.id
+        WHERE bh.status = "borrowed" AND bh.due_date < CURRENT_TIMESTAMP
+        ORDER BY bh.due_date ASC
+    ''').fetchall()
+    
+    # Fine Report
+    fine_report = db.execute('''
+        SELECT u.full_name, SUM(fine_amount) as total_fines, COUNT(*) as fine_count
+        FROM fines f
+        JOIN users u ON f.user_id = u.id
+        GROUP BY f.user_id
+        ORDER BY total_fines DESC
+    ''').fetchall()
+    
+    db.close()
+    
+    return render_template('admin/reports.html',
+                         borrowing_report=borrowing_report,
+                         user_activity=user_activity,
+                         overdue_report=overdue_report,
+                         fine_report=fine_report)
+
+@app.route('/admin/all-borrowed-books')
+@admin_required
+def admin_borrowed_books():
+    """Admin: View all borrowed books"""
+    page = request.args.get('page', 1, type=int)
+    status_filter = request.args.get('status', 'borrowed').strip()
+    
+    db = get_db()
+    
+    # Build query
+    query = 'SELECT bh.*, b.title, b.author, u.full_name FROM borrow_history bh JOIN books b ON bh.book_id = b.id JOIN users u ON bh.user_id = u.id WHERE 1=1'
+    params = []
+    
+    if status_filter in ['borrowed', 'returned']:
+        query += ' AND bh.status = ?'
+        params.append(status_filter)
+    
+    # Get total count
+    count_query = f'SELECT COUNT(*) as count FROM ({query})'
+    total = db.execute(count_query, params).fetchone()['count']
+    
+    # Pagination
+    per_page = 10
+    offset = (page - 1) * per_page
+    query += ' ORDER BY bh.borrow_date DESC LIMIT ? OFFSET ?'
+    params.extend([per_page, offset])
+    
+    borrowed_books = db.execute(query, params).fetchall()
+    db.close()
+    
+    total_pages = (total + per_page - 1) // per_page
+    
+    return render_template('admin/borrowed_books.html',
+                         borrowed_books=borrowed_books,
+                         page=page,
+                         total_pages=total_pages,
+                         status_filter=status_filter)
+
+# ==================== LIBRARIAN ROUTES ====================
+
+@app.route('/librarian/student-records')
+@librarian_required
+def student_records():
+    """Librarian: View all student records"""
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('search', '').strip()
+    
+    db = get_db()
+    
+    # Build query
+    query = 'SELECT * FROM users WHERE role IN ("user", "student")'
+    params = []
+    
+    if search:
+        query += ' AND (full_name LIKE ? OR username LIKE ? OR email LIKE ?)'
+        search_param = f'%{search}%'
+        params.extend([search_param, search_param, search_param])
+    
+    # Get total count
+    count_query = f'SELECT COUNT(*) as count FROM ({query})'
+    total = db.execute(count_query, params).fetchone()['count']
+    
+    # Pagination
+    per_page = 10
+    offset = (page - 1) * per_page
+    query += ' ORDER BY full_name ASC LIMIT ? OFFSET ?'
+    params.extend([per_page, offset])
+    
+    students = db.execute(query, params).fetchall()
+    
+    # Get additional info for each student
+    student_info = []
+    for student in students:
+        borrowed = db.execute(
+            'SELECT COUNT(*) as count FROM borrow_history WHERE user_id = ? AND status = "borrowed"',
+            (student['id'],)
+        ).fetchone()['count']
+        
+        fines = db.execute(
+            'SELECT SUM(fine_amount) as total FROM fines WHERE user_id = ? AND paid = 0',
+            (student['id'],)
+        ).fetchone()['total'] or 0
+        
+        student_info.append({
+            'student': student,
+            'borrowed_count': borrowed,
+            'fines': fines
+        })
+    
+    db.close()
+    
+    total_pages = (total + per_page - 1) // per_page
+    
+    return render_template('librarian/student_records.html',
+                         student_info=student_info,
+                         page=page,
+                         total_pages=total_pages,
+                         search=search)
+
+@app.route('/librarian/calculate-fines')
+@librarian_required
+def calculate_fines():
+    """Librarian: Calculate and manage fines"""
+    db = get_db()
+    
+    # Get all overdue books with pending fines
+    overdue_fines = db.execute('''
+        SELECT bh.*, b.title, u.full_name, u.email,
+               CAST((julianday(CURRENT_TIMESTAMP) - julianday(bh.due_date)) AS INTEGER) as days_overdue
+        FROM borrow_history bh
+        JOIN books b ON bh.book_id = b.id
+        JOIN users u ON bh.user_id = u.id
+        WHERE bh.status = "borrowed" AND bh.due_date < CURRENT_TIMESTAMP
+        ORDER BY bh.due_date ASC
+    ''').fetchall()
+    
+    # Calculate fines for all overdue books
+    for fine_record in overdue_fines:
+        days_overdue = max(1, fine_record['days_overdue'])
+        fine_amount = days_overdue * 10  # 10 per day
+        
+        # Check if fine already exists
+        existing_fine = db.execute(
+            'SELECT COUNT(*) as count FROM fines WHERE borrow_id = ?',
+            (fine_record['id'],)
+        ).fetchone()['count']
+        
+        if existing_fine == 0:
+            db.execute(
+                'INSERT INTO fines (user_id, borrow_id, fine_amount) VALUES (?, ?, ?)',
+                (fine_record['user_id'], fine_record['id'], fine_amount)
+            )
+    
+    db.commit()
+    
+    # Get updated fine records
+    all_fines = db.execute('''
+        SELECT f.*, u.full_name, b.title, bh.due_date
+        FROM fines f
+        JOIN users u ON f.user_id = u.id
+        JOIN borrow_history bh ON f.borrow_id = bh.id
+        JOIN books b ON bh.book_id = b.id
+        WHERE f.paid = 0
+        ORDER BY f.created_at DESC
+    ''').fetchall()
+    
+    # Group by user
+    fines_by_user = {}
+    for fine in all_fines:
+        user_id = fine['user_id']
+        if user_id not in fines_by_user:
+            fines_by_user[user_id] = {
+                'user_name': fine['full_name'],
+                'fines': [],
+                'total': 0
+            }
+        fines_by_user[user_id]['fines'].append(fine)
+        fines_by_user[user_id]['total'] += fine['fine_amount']
+    
+    db.close()
+    
+    return render_template('librarian/calculate_fines.html',
+                         fines_by_user=fines_by_user)
+
+@app.route('/librarian/mark-fine-paid/<int:fine_id>', methods=['POST'])
+@librarian_required
+def mark_fine_paid(fine_id):
+    """Librarian: Mark fine as paid"""
+    db = get_db()
+    
+    fine = db.execute('SELECT * FROM fines WHERE id = ?', (fine_id,)).fetchone()
+    
+    if fine:
+        db.execute('UPDATE fines SET paid = 1 WHERE id = ?', (fine_id,))
+        db.commit()
+        log_activity(session['user_id'], 'Mark Fine Paid', f'Marked fine {fine_id} as paid')
+        flash(f'Fine marked as paid: Rs. {fine["fine_amount"]}', 'success')
+    else:
+        flash('Fine record not found', 'danger')
+    
+    db.close()
+    return redirect(url_for('calculate_fines'))
 
 # ==================== ERROR HANDLERS ====================
 

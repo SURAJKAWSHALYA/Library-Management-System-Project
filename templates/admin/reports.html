@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}System Reports{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">System Reports</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Most Borrowed Books Report -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Top 10 Most Borrowed Books</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Book Title</th>
+                                <th class="text-end">Times Borrowed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if borrowing_report %}
+                                {% for book in borrowing_report %}
+                                <tr>
+                                    <td>{{ book['title'] }}</td>
+                                    <td class="text-end"><strong>{{ book['times_borrowed'] }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-3">No borrowing data</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Activity Report -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Top 10 Active Users</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User Name</th>
+                                <th class="text-end">Activities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if user_activity %}
+                                {% for user in user_activity %}
+                                <tr>
+                                    <td>{{ user['full_name'] }}</td>
+                                    <td class="text-end"><strong>{{ user['activities'] }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-3">No activity data</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overdue Books Report -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Overdue Books Report</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Book Title</th>
+                                <th>Due Date</th>
+                                <th class="text-end">Days Overdue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if overdue_report %}
+                                {% for record in overdue_report %}
+                                <tr class="table-warning">
+                                    <td>{{ record['full_name'] }}</td>
+                                    <td>{{ record['title'] }}</td>
+                                    <td>{{ record['due_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
+                                    <td class="text-end">
+                                        <strong>
+                                            {% set days_overdue = ((now|string)|int - (record['due_date']|parse_dt|as_timestamp)|int) / 86400 %}
+                                            {{ "%.0f"|format(days_overdue) }} days
+                                        </strong>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">No overdue books</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fines Report -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">Pending Fines Report</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th class="text-center">Number of Fines</th>
+                                <th class="text-end">Total Fine Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if fine_report %}
+                                {% for record in fine_report %}
+                                <tr>
+                                    <td>{{ record['full_name'] }}</td>
+                                    <td class="text-center"><strong>{{ record['fine_count'] }}</strong></td>
+                                    <td class="text-end"><strong>Rs. {{ "%.2f"|format(record['total_fines']) }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-3">No pending fines</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
