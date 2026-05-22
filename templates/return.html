@@ -24,7 +24,7 @@
                                     <option value="">-- Choose a book --</option>
                                     {% for borrow in borrowed %}
                                         <option value="{{ borrow['id'] }}">
-                                            {{ borrow['title'] }} - Due: {{ (borrow['due_date']|parse_dt).strftime('%b %d, %Y') if borrow['due_date'] else 'N/A' }}
+                                            {{ borrow['title'] }} ({{ borrow['quantity'] or 1 }} copy{% if (borrow['quantity'] or 1) > 1 %}ies{% endif %}) - {{ borrow['full_name'] }} - Due: {{ (borrow['due_date']|parse_dt).strftime('%b %d, %Y') if borrow['due_date'] else 'N/A' }}
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -62,8 +62,9 @@
                         {% for borrow in borrowed %}
                             <div class="borrowed-item">
                                 <h6>{{ borrow['title'] }}</h6>
-                                <p class="text-muted">{{ borrow['author'] }}</p>
+                                <p class="text-muted mb-1">{{ borrow['author'] }} • {{ borrow['full_name'] }}</p>
                                 <small class="text-danger">Due: {{ (borrow['due_date']|parse_dt).strftime('%b %d, %Y') if borrow['due_date'] else 'N/A' }}</small>
+                                <div><small class="text-muted">Qty: {{ borrow['quantity'] or 1 }}</small></div>
                             </div>
                         {% endfor %}
                     </div>

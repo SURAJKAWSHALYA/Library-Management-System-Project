@@ -108,11 +108,21 @@ def init_db():
             borrow_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             due_date TIMESTAMP,
             return_date TIMESTAMP,
+            quantity INTEGER DEFAULT 1,
             status TEXT DEFAULT 'borrowed',
+            return_verified INTEGER DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users(id),
             FOREIGN KEY (book_id) REFERENCES books(id)
         )
     ''')
+
+    # Ensure older databases get the new borrow_history columns
+    cursor.execute('PRAGMA table_info(borrow_history)')
+    existing_columns = [row[1] for row in cursor.fetchall()]
+    if 'quantity' not in existing_columns:
+        cursor.execute('ALTER TABLE borrow_history ADD COLUMN quantity INTEGER DEFAULT 1')
+    if 'return_verified' not in existing_columns:
+        cursor.execute('ALTER TABLE borrow_history ADD COLUMN return_verified INTEGER DEFAULT 0')
     
     # Fines Table
     cursor.execute('''
@@ -435,8 +445,10 @@ def librarian_borrow_requests():
         WHERE bh.status = "requested"
         ORDER BY bh.borrow_date ASC
     ''').fetchall()
+
+    available_books = db.execute('SELECT * FROM books WHERE quantity > 0 ORDER BY title').fetchall()
     db.close()
-    return render_template('librarian/borrow_requests.html', requests=requests)
+    return render_template('librarian/borrow_requests.html', requests=requests, available_books=available_books)
 
 @app.route('/librarian/approve-request/<int:request_id>', methods=['POST'])
 @librarian_required
@@ -449,16 +461,17 @@ def approve_request(request_id):
         return redirect(url_for('librarian_borrow_requests'))
 
     book = db.execute('SELECT * FROM books WHERE id = ?', (request_row['book_id'],)).fetchone()
-    if not book or book['quantity'] <= 0:
+    request_quantity = request_row['quantity'] or 1
+    if not book or book['quantity'] < request_quantity:
         db.close()
-        flash('Book is not available to issue', 'warning')
+        flash('Book is not available in the requested quantity to issue', 'warning')
         return redirect(url_for('librarian_borrow_requests'))
 
     db.execute('UPDATE borrow_history SET status = "borrowed" WHERE id = ?', (request_id,))
-    db.execute('UPDATE books SET quantity = quantity - 1 WHERE id = ?', (book['id'],))
+    db.execute('UPDATE books SET quantity = quantity - ? WHERE id = ?', (request_quantity, book['id']))
     db.commit()
     db.close()
-    log_activity(session['user_id'], 'Approve Request', f'Approved book request ID: {request_id} for {book["title"]}')
+    log_activity(session['user_id'], 'Approve Request', f'Approved request ID: {request_id} for {request_quantity} copy(ies) of {book["title"]}')
     flash('Request approved and book issued', 'success')
     return redirect(url_for('librarian_borrow_requests'))
 
@@ -604,11 +617,16 @@ def request_book():
     """Student requests a book for librarian approval"""
     book_id = request.form.get('book_id', 0, type=int)
     borrow_days = request.form.get('borrow_days', 14, type=int)
+    quantity = request.form.get('quantity', 1, type=int)
     
     if borrow_days < 1 or borrow_days > 30:
         flash('Request period must be between 1 and 30 days', 'danger')
         return redirect(url_for('view_books'))
     
+    if quantity < 1:
+        flash('Please request at least one copy', 'danger')
+        return redirect(url_for('view_books'))
+
     db = get_db()
     book = db.execute('SELECT * FROM books WHERE id = ?', (book_id,)).fetchone()
     if not book:
@@ -616,11 +634,11 @@ def request_book():
         flash('Book not found', 'danger')
         return redirect(url_for('view_books'))
     
-    if book['quantity'] <= 0:
+    if quantity > book['quantity']:
         db.close()
-        flash('Book is currently unavailable', 'warning')
+        flash(f'Only {book["quantity"]} copies are available right now', 'warning')
         return redirect(url_for('view_books'))
-    
+
     existing = db.execute(
         'SELECT COUNT(*) as count FROM borrow_history WHERE user_id = ? AND book_id = ? AND status IN ("requested", "borrowed")',
         (session['user_id'], book_id)
@@ -633,12 +651,12 @@ def request_book():
     
     due_date = datetime.now() + timedelta(days=borrow_days)
     db.execute(
-        'INSERT INTO borrow_history (user_id, book_id, due_date, status) VALUES (?, ?, ?, "requested")',
-        (session['user_id'], book_id, due_date)
+        'INSERT INTO borrow_history (user_id, book_id, due_date, quantity, status) VALUES (?, ?, ?, ?, "requested")',
+        (session['user_id'], book_id, due_date, quantity)
     )
     db.commit()
     db.close()
-    log_activity(session['user_id'], 'Request Book', f'Requested book: {book["title"]}')
+    log_activity(session['user_id'], 'Request Book', f'Requested {quantity} copy(ies) of: {book["title"]}')
     flash('Your request has been submitted to the librarian', 'success')
     return redirect(url_for('view_books'))
 
@@ -763,10 +781,9 @@ def delete_book(book_id):
 @app.route('/borrow-book', methods=['GET', 'POST'])
 @librarian_required
 def borrow_book():
-    """Borrow a book"""
-    db = get_db()
-    
+    """Redirect issue-book view to combined borrow requests page"""
     if request.method == 'POST':
+        db = get_db()
         book_id = request.form.get('book_id', 0, type=int)
         borrow_days = request.form.get('borrow_days', 14, type=int)
         
@@ -779,10 +796,12 @@ def borrow_book():
         book = db.execute('SELECT * FROM books WHERE id = ?', (book_id,)).fetchone()
         
         if not book:
+            db.close()
             flash('Book not found', 'danger')
             return redirect(url_for('borrow_book'))
         
         if book['quantity'] <= 0:
+            db.close()
             flash('Book not available for borrowing', 'warning')
             return redirect(url_for('borrow_book'))
         
@@ -793,6 +812,7 @@ def borrow_book():
         ).fetchone()['count']
         
         if existing > 0:
+            db.close()
             flash('You already have this book. Please return it first', 'warning')
             return redirect(url_for('borrow_book'))
         
@@ -809,15 +829,12 @@ def borrow_book():
         db.execute('UPDATE books SET quantity = quantity - 1 WHERE id = ?', (book_id,))
         
         db.commit()
+        db.close()
         log_activity(session['user_id'], 'Borrow Book', f'Borrowed book: {book["title"]}')
         flash(f'Book borrowed successfully! Due date: {due_date.strftime("%Y-%m-%d")}', 'success')
         return redirect(url_for('dashboard'))
     
-    # GET request - show available books
-    books = db.execute('SELECT * FROM books WHERE quantity > 0 ORDER BY title').fetchall()
-    db.close()
-    
-    return render_template('borrow.html', books=books)
+    return redirect(url_for('librarian_borrow_requests'))
 
 @app.route('/return-book', methods=['GET', 'POST'])
 @librarian_required
@@ -830,16 +847,12 @@ def return_book():
         
         # Get borrow record
         borrow = db.execute(
-            'SELECT * FROM borrow_history WHERE id = ? AND user_id = ?',
-            (borrow_id, session['user_id'])
+            'SELECT * FROM borrow_history WHERE id = ? AND status = "borrowed"',
+            (borrow_id,)
         ).fetchone()
         
         if not borrow:
-            flash('Borrow record not found', 'danger')
-            return redirect(url_for('return_book'))
-        
-        if borrow['status'] != 'borrowed':
-            flash('Book already returned', 'warning')
+            flash('Borrow record not found or book already returned', 'danger')
             return redirect(url_for('return_book'))
         
         # Calculate fine
@@ -858,34 +871,37 @@ def return_book():
         if fine > 0:
             db.execute(
                 'INSERT INTO fines (user_id, borrow_id, fine_amount) VALUES (?, ?, ?)',
-                (session['user_id'], borrow_id, fine)
+                (borrow['user_id'], borrow_id, fine)
             )
         
         # Update book quantity
         db.execute(
-            'UPDATE books SET quantity = quantity + 1 WHERE id = ?',
-            (borrow['book_id'],)
+            'UPDATE books SET quantity = quantity + ? WHERE id = ?',
+            (borrow['quantity'] or 1, borrow['book_id'])
         )
         
         db.commit()
         
         book = db.execute('SELECT title FROM books WHERE id = ?', (borrow['book_id'],)).fetchone()
-        log_activity(session['user_id'], 'Return Book', f'Returned book: {book["title"]}')
+        quantity = borrow['quantity'] or 1
+        log_activity(session['user_id'], 'Return Book', f'Returned {quantity} copy(ies) of {book["title"]}')
         
         message = f'Book returned successfully!'
+        if quantity > 1:
+            message = f'{quantity} copies returned successfully!'
         if fine > 0:
             message += f' Fine: Rs. {fine} (Due to {days_late} days late)'
         
         flash(message, 'success')
         return redirect(url_for('dashboard'))
     
-    # GET request - show user's borrowed books
+    # GET request - show all borrowed books pending return
     borrowed = db.execute(
-        '''SELECT bh.*, b.title, b.author FROM borrow_history bh
+        '''SELECT bh.*, b.title, b.author, u.full_name FROM borrow_history bh
            JOIN books b ON bh.book_id = b.id
-           WHERE bh.user_id = ? AND bh.status = "borrowed"
-           ORDER BY bh.borrow_date DESC''',
-        (session['user_id'],)
+           JOIN users u ON bh.user_id = u.id
+           WHERE bh.status = "borrowed"
+           ORDER BY bh.borrow_date DESC'''
     ).fetchall()
     
     db.close()
@@ -1215,6 +1231,23 @@ def admin_borrowed_books():
                          page=page,
                          total_pages=total_pages,
                          status_filter=status_filter)
+
+@app.route('/admin/verify-return/<int:borrow_id>', methods=['POST'])
+@admin_required
+def admin_verify_return(borrow_id):
+    db = get_db()
+    borrow = db.execute('SELECT * FROM borrow_history WHERE id = ? AND status = "returned"', (borrow_id,)).fetchone()
+    if not borrow:
+        db.close()
+        flash('Return record not found or not yet returned', 'danger')
+        return redirect(url_for('admin_borrowed_books'))
+
+    db.execute('UPDATE borrow_history SET return_verified = 1 WHERE id = ?', (borrow_id,))
+    db.commit()
+    db.close()
+    log_activity(session['user_id'], 'Verify Return', f'Verified return for borrow ID: {borrow_id}')
+    flash('Return has been verified successfully', 'success')
+    return redirect(url_for('admin_borrowed_books'))
 
 # ==================== LIBRARIAN ROUTES ====================
 

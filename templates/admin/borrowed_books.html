@@ -42,10 +42,12 @@
                         <th>Student</th>
                         <th>Book Title</th>
                         <th>Author</th>
+                        <th>Qty</th>
                         <th>Borrow Date</th>
                         <th>Due Date</th>
                         <th>Return Date</th>
                         <th>Status</th>
+                        <th>Verified</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,6 +57,7 @@
                             <td><strong>{{ record['full_name'] }}</strong></td>
                             <td>{{ record['title'] }}</td>
                             <td>{{ record['author'] }}</td>
+                            <td>{{ record['quantity'] or 1 }}</td>
                             <td>{{ record['borrow_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
                             <td>
                                 {% if record['due_date'] %}
@@ -76,6 +79,19 @@
                                     <span class="badge bg-success">Returned</span>
                                 {% else %}
                                     <span class="badge bg-secondary">{{ record['status'] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record['status'] == 'returned' %}
+                                    {% if record['return_verified'] %}
+                                        <span class="badge bg-success">Verified</span>
+                                    {% else %}
+                                        <form method="POST" action="{{ url_for('admin_verify_return', borrow_id=record['id']) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Verify</button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
                                 {% endif %}
                             </td>
                         </tr>

@@ -5,14 +5,22 @@
 {% block content %}
 <div class="container-fluid mt-5">
     <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="display-4">Borrow Requests</h1>
-            <p class="text-muted">Review student book requests and approve or decline them.</p>
+        <div class="col-md-8">
+            <h1 class="display-4">Borrow Requests & Issue Books</h1>
+            <p class="text-muted">All request details, requested return date, quantity, and issue approval in one page.</p>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light border-0 shadow-sm p-3">
+                <h5 class="mb-3">Overview</h5>
+                <p class="mb-2">Pending Requests: <strong>{{ requests|length }}</strong></p>
+                <p class="mb-2">Available Books: <strong>{{ available_books|length }}</strong></p>
+                <p class="text-muted small mb-0">Approve requests to issue the book and use this page to monitor return dates and quantities.</p>
+            </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-lg-8">
             <div class="card">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
@@ -21,7 +29,9 @@
                                 <th>Request ID</th>
                                 <th>Student</th>
                                 <th>Book</th>
-                                <th>Requested Days</th>
+                                <th>Qty</th>
+                                <th>Borrow Days</th>
+                                <th>Due Date</th>
                                 <th>Requested On</th>
                                 <th>Action</th>
                             </tr>
@@ -33,7 +43,9 @@
                                     <td>{{ req['id'] }}</td>
                                     <td>{{ req['full_name'] }}</td>
                                     <td>{{ req['title'] }} by {{ req['author'] }}</td>
+                                    <td>{{ req['quantity'] or 1 }}</td>
                                     <td>{{ ((req['due_date']|parse_dt) - (req['borrow_date']|parse_dt)).days }}</td>
+                                    <td>{{ req['due_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
                                     <td>{{ req['borrow_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
                                     <td>
                                         <form method="POST" action="{{ url_for('approve_request', request_id=req['id']) }}" class="d-inline">
@@ -47,12 +59,48 @@
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">No borrow requests pending review.</td>
+                                    <td colspan="8" class="text-center text-muted">No borrow requests pending review.</td>
                                 </tr>
                             {% endif %}
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Available Books</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if available_books %}
+                                {% for book in available_books[:10] %}
+                                <tr>
+                                    <td>{{ book['title'] }}</td>
+                                    <td><span class="badge bg-primary">{{ book['quantity'] }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted">No books available right now.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if available_books|length > 10 %}
+                <div class="card-footer text-center small text-muted">
+                    Showing top 10 available books
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
