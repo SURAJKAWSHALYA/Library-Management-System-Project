@@ -460,6 +460,21 @@ def approve_request(request_id):
         flash('Request not found or already processed', 'danger')
         return redirect(url_for('librarian_borrow_requests'))
 
+    # Allow librarian to override borrow days when approving
+    try:
+        form_days = int(request.form.get('borrow_days', 0))
+    except (TypeError, ValueError):
+        form_days = 0
+
+    # Calculate default requested days from request record
+    default_days = 14
+    try:
+        default_days = max(1, ((parse_datetime(request_row['due_date']) - parse_datetime(request_row['borrow_date'])).days))
+    except Exception:
+        default_days = 14
+
+    borrow_days = form_days if form_days and 1 <= form_days <= 30 else default_days
+
     book = db.execute('SELECT * FROM books WHERE id = ?', (request_row['book_id'],)).fetchone()
     request_quantity = request_row['quantity'] or 1
     if not book or book['quantity'] < request_quantity:
@@ -467,12 +482,15 @@ def approve_request(request_id):
         flash('Book is not available in the requested quantity to issue', 'warning')
         return redirect(url_for('librarian_borrow_requests'))
 
-    db.execute('UPDATE borrow_history SET status = "borrowed" WHERE id = ?', (request_id,))
+    # Set new due date relative to now (issue time)
+    new_due_date = datetime.now() + timedelta(days=borrow_days)
+
+    db.execute('UPDATE borrow_history SET status = "borrowed", due_date = ? WHERE id = ?', (new_due_date, request_id))
     db.execute('UPDATE books SET quantity = quantity - ? WHERE id = ?', (request_quantity, book['id']))
     db.commit()
     db.close()
-    log_activity(session['user_id'], 'Approve Request', f'Approved request ID: {request_id} for {request_quantity} copy(ies) of {book["title"]}')
-    flash('Request approved and book issued', 'success')
+    log_activity(session['user_id'], 'Approve Request', f'Approved request ID: {request_id} for {request_quantity} copy(ies) of {book["title"]} for {borrow_days} days')
+    flash(f'Request approved and book issued for {borrow_days} day(s)', 'success')
     return redirect(url_for('librarian_borrow_requests'))
 
 @app.route('/librarian/decline-request/<int:request_id>', methods=['POST'])

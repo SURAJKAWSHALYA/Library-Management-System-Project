@@ -30,7 +30,7 @@
                                 <th>Student</th>
                                 <th>Book</th>
                                 <th>Qty</th>
-                                <th>Borrow Days</th>
+                                <th>Requested Days</th>
                                 <th>Due Date</th>
                                 <th>Requested On</th>
                                 <th>Action</th>
@@ -48,7 +48,8 @@
                                     <td>{{ req['due_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
                                     <td>{{ req['borrow_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
                                     <td>
-                                        <form method="POST" action="{{ url_for('approve_request', request_id=req['id']) }}" class="d-inline">
+                                        <form method="POST" action="{{ url_for('approve_request', request_id=req['id']) }}" class="d-inline d-flex align-items-center">
+                                            <input type="number" name="borrow_days" min="1" max="30" value="{{ ((req['due_date']|parse_dt) - (req['borrow_date']|parse_dt)).days }}" class="form-control form-control-sm me-1" style="width:6rem;" title="Requested Days">
                                             <button type="submit" class="btn btn-sm btn-success">Approve</button>
                                         </form>
                                         <form method="POST" action="{{ url_for('decline_request', request_id=req['id']) }}" class="d-inline ms-1">
