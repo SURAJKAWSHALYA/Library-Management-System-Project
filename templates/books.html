@@ -1,163 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Books - Library Management System</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body data-bs-theme="light">
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom sticky-top" id="main-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <span class="fs-5">📚 Library Management</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/books">Books</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('add_book') }}">Add Book</a>
-                    </li>
-                    <li class="nav-item">
-                        <button class="btn btn-outline-secondary ms-2" id="theme-toggle" title="Toggle Dark Mode">
-                            <i class="bi bi-moon-fill"></i>
-                        </button>
-                    </li>
-                </ul>
-            </div>
+{% extends "base.html" %}
+
+{% block title %}Browse Books{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/glass_light_ui.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="student-shell">
+  <aside class="sidebar-glass wide-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo"><i class="fas fa-book-reader"></i> LMS</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Menu</div>
+      <a href="{{ url_for('dashboard') }}" class="sidebar-link"><i class="fas fa-home"></i> <span>Home</span></a>
+      <a href="{{ url_for('view_books') }}" class="sidebar-link active"><i class="fas fa-book"></i> <span>Discover</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Library</div>
+      <a href="{{ url_for('history') }}" class="sidebar-link"><i class="fas fa-history"></i> <span>History</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a href="{{ url_for('settings') }}" class="sidebar-link"><i class="fas fa-cog"></i> <span>Settings</span></a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a>
+    </div>
+  </aside>
+
+  <div class="student-main-area dashboard-bg">
+    <div class="topbar-glass">
+      <div class="topbar-brand">
+        <div class="topbar-badge">BKS</div>
+        <div>
+          <div class="topbar-title">Browse books</div>
+          <div class="topbar-caption">Search the catalog, filter by category, and request your next title.</div>
         </div>
-    </nav>
+      </div>
 
-    <main class="py-4">
-        <div class="container">
-            <!-- Page Header with Back Button -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <a href="/dashboard" class="btn btn-outline-secondary" title="Go Back">
-                            <i class="bi bi-arrow-left"></i> Back
-                        </a>
-                        <div>
-                            <h1 class="mb-0">📚 Library Books</h1>
-                            <p class="text-muted mb-0">All books in your collection</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <form class="topbar-search" method="GET" action="{{ url_for('view_books') }}">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search" value="{{ search }}" placeholder="Search every book" />
+      </form>
 
-            <!-- Books Table -->
-            {% if books %}
-            <div class="row">
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Total Books: <span class="badge bg-primary">{{ books|length }}</span></h5>
-                            {% if role == 'librarian' %}
-                            <a href="{{ url_for('add_book') }}" class="btn btn-sm btn-success"><i class="bi bi-plus"></i> Add Book</a>
-                            {% endif %}
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th><i class="bi bi-hash"></i> ID</th>
-                                            <th><i class="bi bi-book"></i> Title</th>
-                                            <th><i class="bi bi-person"></i> Author</th>
-                                            <th><i class="bi bi-barcode"></i> ISBN</th>
-                                            <th><i class="bi bi-calendar"></i> Year</th>
-                                            <th><i class="bi bi-box"></i> Qty</th>
-                                            <th><i class="bi bi-clock"></i> Added On</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for book in books %}
-                                        <tr>
-                                            <td><strong>{{ book.id }}</strong></td>
-                                            <td><strong class="text-primary">{{ book.title }}</strong></td>
-                                            <td>{{ book.author }}</td>
-                                            <td><code>{{ book.isbn if book.isbn else 'N/A' }}</code></td>
-                                            <td>{{ book.year_published if book.year_published else 'N/A' }}</td>
-                                            <td><span class="badge bg-primary">{{ book.quantity }}</span></td>
-                                            <td><small class="text-muted">{{ (book.created_at|parse_dt).strftime('%b %d, %Y') if book.created_at else 'N/A' }}</small></td>
-                                            <td>
-                                                {% if role in ['user', 'student'] %}
-                                                    {% if book.quantity > 0 %}
-                                                        {% if book.id in requested_book_ids %}
-                                                            <span class="badge bg-info">Requested</span>
-                                                        {% else %}
-                                                            <form method="POST" action="{{ url_for('request_book') }}" class="d-flex gap-1 align-items-center">
-                                                                <input type="hidden" name="book_id" value="{{ book.id }}">
-                                                                <input type="hidden" name="borrow_days" value="14">
-                                                                <input type="number" name="quantity" class="form-control form-control-sm" min="1" max="{{ book.quantity }}" value="1" style="width: 5.5rem;" title="Quantity">
-                                                                <button type="submit" class="btn btn-sm btn-primary">
-                                                                    <i class="bi bi-send"></i> Request
-                                                                </button>
-                                                            </form>
-                                                            <small class="text-muted">Max {{ book.quantity }}</small>
-                                                        {% endif %}
-                                                    {% else %}
-                                                        <span class="badge bg-secondary">Unavailable</span>
-                                                    {% endif %}
-                                                {% else %}
-                                                    <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}" class="delete-form" style="display: inline;">
-                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete {{ book.title }}?')">
-                                                            <i class="bi bi-trash"></i> Delete
-                                                        </button>
-                                                    </form>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <div class="row">
-                <div class="col-lg-6 mx-auto">
-                    <div class="alert alert-info text-center py-5">
-                        <div class="mb-3"><i class="bi bi-inbox" style="font-size: 3rem; color: #0c63e4;"></i></div>
-                        <h4>📭 No Books Found</h4>
-                        <p class="text-muted mb-3">Your library is empty. Start by adding your first book!</p>
-                        <a href="{{ url_for('add_book') }}" class="btn btn-success"><i class="bi bi-plus"></i> Add Your First Book</a>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+      <div class="topbar-actions">
+        <a href="{{ url_for('history') }}" title="History"><i class="fas fa-clock"></i></a>
+        <a href="{{ url_for('settings') }}" title="Profile"><i class="fas fa-user-circle"></i></a>
+      </div>
+    </div>
+
+    <div class="student-page-content">
+      <div class="page-toolbar">
+        <div class="page-heading">
+          <h1>Library catalog</h1>
+          <p>Find the right book and submit a request in seconds.</p>
         </div>
-    </main>
-
-    <footer class="bg-light border-top mt-5 py-4">
-        <div class="container text-center">
-            <p class="text-muted mb-0">&copy; 2026 Library Management System. All rights reserved.</p>
+        <div class="stats-summary">
+          <div class="summary-chip">{{ books|length }} results</div>
+          <div class="summary-chip">Page {{ page }}</div>
+          {% if role in ['user', 'student'] %}
+            <div class="summary-chip">Requests are available</div>
+          {% endif %}
         </div>
-    </footer>
+      </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+      <div class="glass-card">
+        <form class="filter-form" method="GET" action="{{ url_for('view_books') }}">
+          <div class="search-field">
+            <i class="fas fa-book"></i>
+            <input type="text" name="search" value="{{ search }}" placeholder="Search by title, author, or ISBN">
+          </div>
+
+          <select class="filter-select" name="category">
+            <option value="">All categories</option>
+            {% for category_row in categories %}
+              <option value="{{ category_row['category'] }}" {% if category_row['category'] == category %}selected{% endif %}>{{ category_row['category'] }}</option>
+            {% endfor %}
+          </select>
+
+          <button type="submit" class="btn-accent">Apply filters</button>
+        </form>
+      </div>
+
+      <div class="table-shell">
+        {% if books %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>ISBN</th>
+                  <th>Year</th>
+                  <th>Qty</th>
+                  <th>Added</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for book in books %}
+                  <tr>
+                    <td><strong>{{ book.id }}</strong></td>
+                    <td><strong>{{ book.title }}</strong></td>
+                    <td>{{ book.author }}</td>
+                    <td>{{ book.isbn if book.isbn else 'N/A' }}</td>
+                    <td>{{ book.year_published if book.year_published else 'N/A' }}</td>
+                    <td>{{ book.quantity }}</td>
+                    <td>{{ (book.created_at|parse_dt).strftime('%b %d, %Y') if book.created_at else 'N/A' }}</td>
+                    <td>
+                      {% if role in ['user', 'student'] %}
+                        {% if book.quantity > 0 %}
+                          {% if book.id in requested_book_ids %}
+                            <span class="status-pill info">Requested</span>
+                          {% else %}
+                            <form method="POST" action="{{ url_for('request_book') }}" class="d-flex gap-2 align-items-center">
+                              <input type="hidden" name="book_id" value="{{ book.id }}">
+                              <input type="hidden" name="borrow_days" value="14">
+                              <input type="number" name="quantity" class="form-control form-control-sm" min="1" max="{{ book.quantity }}" value="1" style="width: 5.5rem;" title="Quantity">
+                              <button type="submit" class="btn-accent">Request</button>
+                            </form>
+                          {% endif %}
+                        {% else %}
+                          <span class="status-pill">Unavailable</span>
+                        {% endif %}
+                      {% else %}
+                        <a href="{{ url_for('edit_book', book_id=book.id) }}" class="btn-outline-light">Edit</a>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-state">No matching books found. Try a different search term or category.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

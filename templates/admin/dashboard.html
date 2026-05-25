@@ -3,174 +3,188 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="display-4">Admin Dashboard</h1>
-            <p class="text-muted">System Administration & Control</p>
+<div class="student-shell">
+  <aside class="sidebar-glass wide-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo"><i class="fas fa-shield-alt"></i> Admin</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Dashboard</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link active"><i class="fas fa-home"></i> <span>Overview</span></a>
+      <a href="{{ url_for('admin_users') }}" class="sidebar-link"><i class="fas fa-users"></i> <span>Users</span></a>
+      <a href="{{ url_for('add_librarian') }}" class="sidebar-link"><i class="fas fa-user-tie"></i> <span>Add Librarian</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Library</div>
+      <a href="{{ url_for('manage_categories') }}" class="sidebar-link"><i class="fas fa-list"></i> <span>Categories</span></a>
+      <a href="{{ url_for('admin_borrowed_books') }}" class="sidebar-link"><i class="fas fa-book"></i> <span>Borrowings</span></a>
+      <a href="{{ url_for('admin_reports') }}" class="sidebar-link"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a href="{{ url_for('settings') }}" class="sidebar-link"><i class="fas fa-cog"></i> <span>Settings</span></a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a>
+    </div>
+  </aside>
+
+  <div class="student-main-area dashboard-bg">
+    <div class="topbar-glass">
+      <div class="topbar-brand">
+        <div class="topbar-badge">ADM</div>
+        <div>
+          <div class="topbar-title">Admin dashboard</div>
+          <div class="topbar-caption">Manage users, books, reports, and operations from one modern control center.</div>
         </div>
+      </div>
+      <div class="topbar-actions">
+        <a href="{{ url_for('admin_reports') }}" title="Reports"><i class="fas fa-chart-bar"></i></a>
+        <a href="{{ url_for('settings') }}" title="Settings"><i class="fas fa-cog"></i></a>
+      </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Total Books</h5>
-                    <h2>{{ total_books }}</h2>
-                    <small>Library collection</small>
-                </div>
-            </div>
+    <div class="student-page-content">
+      <div class="page-toolbar">
+        <div class="page-heading">
+          <h1>System overview</h1>
+          <p>Monitor your institution’s activity with a clear, glassy admin workspace.</p>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Total Users</h5>
-                    <h2>{{ total_users }}</h2>
-                    <small>Registered members</small>
-                </div>
-            </div>
+        <div class="stats-summary">
+          <div class="summary-chip">{{ total_users }} users</div>
+          <div class="summary-chip">{{ total_books }} books</div>
+          <div class="summary-chip">{{ borrowed_books }} borrowed</div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Librarians</h5>
-                    <h2>{{ total_librarians }}</h2>
-                    <small>Staff members</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Borrowed Books</h5>
-                    <h2>{{ borrowed_books }}</h2>
-                    <small>Currently issued</small>
-                </div>
-            </div>
-        </div>
-    </div>
+      </div>
 
-    <!-- Additional Statistics -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Available Books</h5>
-                    <h2>{{ total_quantity }}</h2>
-                    <small>In stock</small>
-                </div>
-            </div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-card-label">Total Books</span>
+          <span class="metric-card-value">{{ total_books }}</span>
+          <span class="metric-card-caption">Library collection</span>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-secondary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Pending Fines</h5>
-                    <h2>{{ pending_fines }}</h2>
-                    <small>Total: Rs. {{ "%.2f"|format(total_fines) }}</small>
-                </div>
-            </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Total Users</span>
+          <span class="metric-card-value">{{ total_users }}</span>
+          <span class="metric-card-caption">Registered members</span>
         </div>
-    </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Librarians</span>
+          <span class="metric-card-value">{{ total_librarians }}</span>
+          <span class="metric-card-caption">Staff members</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Borrowed Books</span>
+          <span class="metric-card-value">{{ borrowed_books }}</span>
+          <span class="metric-card-caption">Currently issued</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Available Books</span>
+          <span class="metric-card-value">{{ total_quantity }}</span>
+          <span class="metric-card-caption">In stock</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Pending Fines</span>
+          <span class="metric-card-value">{{ pending_fines }}</span>
+          <span class="metric-card-caption">Rs. {{ "%.2f"|format(total_fines) }}</span>
+        </div>
+      </div>
 
-    <!-- Admin Actions -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h3 class="mb-3">Admin Controls</h3>
+      <div class="content-grid">
+        <div class="glass-card">
+          <div class="section-header">
+            <div>
+              <h2>Admin controls</h2>
+              <p>Jump directly into the most used admin actions.</p>
+            </div>
+          </div>
+          <div class="metrics-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <div class="glass-card" style="padding:1rem;">
+              <i class="fas fa-users fa-2x text-primary mb-2"></i>
+              <h3 style="font-size:1rem; margin-bottom:0.35rem;">Manage Users</h3>
+              <p class="mb-3" style="color:var(--muted); font-size:0.92rem;">View, edit, and delete all users.</p>
+              <a href="{{ url_for('admin_users') }}" class="btn-accent">Open</a>
+            </div>
+            <div class="glass-card" style="padding:1rem;">
+              <i class="fas fa-user-tie fa-2x text-warning mb-2"></i>
+              <h3 style="font-size:1rem; margin-bottom:0.35rem;">Add Librarian</h3>
+              <p class="mb-3" style="color:var(--muted); font-size:0.92rem;">Create a new librarian account.</p>
+              <a href="{{ url_for('add_librarian') }}" class="btn-accent">Add</a>
+            </div>
+            <div class="glass-card" style="padding:1rem;">
+              <i class="fas fa-list fa-2x text-info mb-2"></i>
+              <h3 style="font-size:1rem; margin-bottom:0.35rem;">Categories</h3>
+              <p class="mb-3" style="color:var(--muted); font-size:0.92rem;">Review and manage book categories.</p>
+              <a href="{{ url_for('manage_categories') }}" class="btn-accent">Open</a>
+            </div>
+            <div class="glass-card" style="padding:1rem;">
+              <i class="fas fa-chart-bar fa-2x text-success mb-2"></i>
+              <h3 style="font-size:1rem; margin-bottom:0.35rem;">Reports</h3>
+              <p class="mb-3" style="color:var(--muted); font-size:0.92rem;">Generate analytics and compliance reports.</p>
+              <a href="{{ url_for('admin_reports') }}" class="btn-accent">View</a>
+            </div>
+          </div>
         </div>
-    </div>
 
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                    <h5 class="card-title">Manage Users</h5>
-                    <p class="card-text small">View, edit, and delete all users</p>
-                    <a href="{{ url_for('admin_users') }}" class="btn btn-primary btn-sm">Go to Users</a>
-                </div>
+        <div class="glass-card">
+          <div class="section-header">
+            <div>
+              <h2>Quick status</h2>
+              <p>At a glance, what needs attention.</p>
             </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-user-tie fa-3x text-warning mb-3"></i>
-                    <h5 class="card-title">Add Librarian</h5>
-                    <p class="card-text small">Create new librarian account</p>
-                    <a href="{{ url_for('add_librarian') }}" class="btn btn-warning btn-sm">Add Librarian</a>
-                </div>
+          </div>
+          <div class="info-card" style="background: rgba(255,255,255,0.8); margin-bottom: 0.8rem;">
+            <div class="info-row">
+              <strong>Borrowings</strong>
+              <span>{{ borrowed_books }} records currently active</span>
             </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-list fa-3x text-info mb-3"></i>
-                    <h5 class="card-title">Manage Categories</h5>
-                    <p class="card-text small">View and manage book categories</p>
-                    <a href="{{ url_for('manage_categories') }}" class="btn btn-info btn-sm">Categories</a>
-                </div>
+            <div class="info-row">
+              <strong>Pending fines</strong>
+              <span>{{ pending_fines }} outstanding entries</span>
             </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
-                    <h5 class="card-title">View Reports</h5>
-                    <p class="card-text small">Generate system reports and analytics</p>
-                    <a href="{{ url_for('admin_reports') }}" class="btn btn-success btn-sm">Reports</a>
-                </div>
+            <div class="info-row">
+              <strong>Library stock</strong>
+              <span>{{ total_quantity }} copies available</span>
             </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-book fa-3x text-danger mb-3"></i>
-                    <h5 class="card-title">All Borrowings</h5>
-                    <p class="card-text small">View all book borrowing records</p>
-                    <a href="{{ url_for('admin_borrowed_books') }}" class="btn btn-danger btn-sm">Borrowings</a>
-                </div>
-            </div>
+      <div class="glass-card">
+        <div class="section-header">
+          <div>
+            <h2>Recent system activity</h2>
+            <p>Latest actions across the LMS platform.</p>
+          </div>
         </div>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <h3 class="mb-3">Recent System Activity</h3>
-            <div class="card">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>User</th>
-                                <th>Action</th>
-                                <th>Details</th>
-                                <th>Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if recent_activity %}
-                                {% for activity in recent_activity %}
-                                <tr>
-                                    <td><strong>{{ activity['full_name'] }}</strong></td>
-                                    <td><span class="badge bg-info">{{ activity['action'] }}</span></td>
-                                    <td>{{ activity['details'] or 'N/A' }}</td>
-                                    <td>{{ activity['created_at']|parse_dt|strftime('%Y-%m-%d %H:%M') }}</td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">No recent activity</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="table-shell">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Action</th>
+                <th>Details</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if recent_activity %}
+                {% for activity in recent_activity %}
+                <tr>
+                  <td><strong>{{ activity['full_name'] }}</strong></td>
+                  <td><span class="status-pill info">{{ activity['action'] }}</span></td>
+                  <td>{{ activity['details'] or 'N/A' }}</td>
+                  <td>{{ activity['created_at']|parse_dt|strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-4">No recent activity</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

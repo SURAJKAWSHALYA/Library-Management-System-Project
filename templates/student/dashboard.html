@@ -2,180 +2,161 @@
 
 {% block title %}Student Dashboard{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/glass_light_ui.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="display-4">Student Dashboard</h1>
-            <p class="text-muted">Your Library Activities</p>
+
+<div class="student-shell">
+  <aside class="sidebar-glass wide-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo"><i class="fas fa-book-reader"></i> LMS</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Menu</div>
+      <a href="{{ url_for('dashboard') }}" class="sidebar-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fas fa-home"></i> <span>Home</span></a>
+      <a href="{{ url_for('view_books') }}" class="sidebar-link"><i class="fas fa-book"></i> <span>Discover</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Library</div>
+      <a href="{{ url_for('history') }}" class="sidebar-link"><i class="fas fa-history"></i> <span>History</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a href="{{ url_for('settings') }}" class="sidebar-link"><i class="fas fa-cog"></i> <span>Settings</span></a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a>
+    </div>
+  </aside>
+
+  <div class="student-main-area dashboard-bg">
+    <div class="topbar-glass">
+      <div class="topbar-brand">
+        <div class="topbar-badge">LMS</div>
+        <div>
+          <div class="topbar-title">Student dashboard</div>
+          <div class="topbar-caption">Discover your next book and keep your library activity in sync.</div>
         </div>
+      </div>
+
+      <form class="topbar-search" method="GET" action="{{ url_for('view_books') }}">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search" placeholder="Search books, authors, genres..." />
+      </form>
+
+      <div class="topbar-actions">
+        <a href="{{ url_for('history') }}" title="History"><i class="fas fa-clock"></i></a>
+        <a href="{{ url_for('settings') }}" title="Profile"><i class="fas fa-user-circle"></i></a>
+      </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Currently Borrowed</h5>
-                    <h2>{{ borrowed_count }}</h2>
-                    <small>Books in hand</small>
-                </div>
-            </div>
+    <div class="student-page-content">
+      <div class="hero-banner">
+        <div>
+          <div class="eyebrow">Welcome back</div>
+          <h1>{{ session.get('full_name', 'Student') }}</h1>
+          <p>Track your current loans, browse new titles, and stay on top of your reading goals with a clean, consistent student experience.</p>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Total Returned</h5>
-                    <h2>{{ returned_count }}</h2>
-                    <small>Books returned</small>
-                </div>
-            </div>
+        <div class="hero-badges">
+          <div class="hero-badge">
+            <span class="hero-badge-label">Currently borrowed</span>
+            <span class="hero-badge-value">{{ borrowed_count }}</span>
+          </div>
+          <div class="hero-badge">
+            <span class="hero-badge-label">Returned</span>
+            <span class="hero-badge-value">{{ returned_count }}</span>
+          </div>
+          <div class="hero-badge">
+            <span class="hero-badge-label">Pending fines</span>
+            <span class="hero-badge-value">{{ pending_fines }}</span>
+          </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Pending Fines</h5>
-                    <h2>{{ pending_fines }}</h2>
-                    <small>Rs. {{ "%.2f"|format(total_fine_amount) }}</small>
-                </div>
-            </div>
-        </div>
-    </div>
+      </div>
 
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h3 class="mb-3">Quick Actions</h3>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-card-label">Currently borrowed</span>
+          <span class="metric-card-value">{{ borrowed_count }}</span>
+          <span class="metric-card-caption">Active loans in your account</span>
         </div>
-    </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Books returned</span>
+          <span class="metric-card-value">{{ returned_count }}</span>
+          <span class="metric-card-caption">Completed returns this month</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Pending fines</span>
+          <span class="metric-card-value">₹{{ total_fine_amount }}</span>
+          <span class="metric-card-caption">Outstanding amount to settle</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Quick action</span>
+          <span class="metric-card-value">Browse</span>
+          <span class="metric-card-caption"><a href="{{ url_for('view_books') }}" class="btn-outline-light" style="margin-top:0.45rem;">Explore books</a></span>
+        </div>
+      </div>
 
-    <div class="row mb-4">
-        <div class="col-md-4 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-search fa-3x text-primary mb-3"></i>
-                    <h5 class="card-title">Browse Books</h5>
-                    <p class="card-text small">Search and view available books</p>
-                    <a href="{{ url_for('view_books') }}" class="btn btn-primary btn-sm">Search Books</a>
-                </div>
+      <div class="content-grid">
+        <div class="glass-card">
+          <div class="section-header">
+            <div>
+              <h2>Currently borrowed</h2>
+              <p>Keep an eye on your active loans and due dates.</p>
             </div>
-        </div>
-        <div class="col-md-8 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Borrow & Return Restrictions</h5>
-                    <p class="card-text">Only librarians can perform borrow and return operations. If you need a book issued or returned, please contact your library staff.</p>
-                    <p class="text-muted small">This keeps admin, student, and user panels separate from librarian-only library actions.</p>
-                </div>
-            </div>
-        </div>
-    </div>
+            <a href="{{ url_for('view_books') }}" class="btn-accent">Browse all books</a>
+          </div>
 
-    <!-- Currently Borrowed Books -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <h3 class="mb-3">Currently Borrowed Books</h3>
-            {% if borrowed_books %}
-                <div class="row">
-                    {% for item in borrowed_books %}
-                    <div class="col-md-6 mb-3">
-                        <div class="card">
-                            <div class="row g-0">
-                                <div class="col-md-4">
-                                    {% if item['cover_image'] %}
-                                    <img src="{{ url_for('static', filename='uploads/' + item['cover_image']) }}" class="img-fluid rounded-start" alt="Cover">
-                                    {% else %}
-                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                        <i class="fas fa-book fa-3x text-muted"></i>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ item['title'] }}</h5>
-                                        <p class="card-text text-muted">by {{ item['author'] }}</p>
-                                        <div class="mb-2">
-                                            <small><strong>Borrow Date:</strong> {{ item['borrow_date']|parse_dt|strftime('%Y-%m-%d') }}</small><br>
-                                            <small><strong>Due Date:</strong> 
-                                                <span class="{% if item['due_date']|parse_dt < now %}text-danger fw-bold{% endif %}">
-                                                    {{ item['due_date']|parse_dt|strftime('%Y-%m-%d') }}
-                                                </span>
-                                            </small>
-                                        </div>
-                                        <div class="alert alert-warning py-2">
-                                            <small>Return processing is handled by the librarian.</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
+          {% if borrowed_books %}
+            <div class="book-grid">
+              {% for borrow in borrowed_books[:4] %}
+                <div class="book-card">
+                  <div class="book-cover">
+                    {% if borrow.cover_image %}
+                      <img src="{{ borrow.cover_image }}" alt="{{ borrow.title }}">
+                    {% else %}
+                      <span>{{ borrow.title[:1] }}</span>
+                    {% endif %}
+                  </div>
+                  <div class="book-meta">
+                    <h3>{{ borrow.title }}</h3>
+                    <p>{{ borrow.author }}</p>
+                    <span class="status-pill borrowed">Due {{ (borrow.due_date|parse_dt).strftime('%b %d') if borrow.due_date else 'TBD' }}</span>
+                  </div>
                 </div>
-            {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> You haven't borrowed any books yet. 
-                    <a href="{{ url_for('borrow_book') }}">Start borrowing now!</a>
-                </div>
-            {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state">You currently have no borrowed books. Explore the catalog to get started.</div>
+          {% endif %}
         </div>
-    </div>
 
-    <!-- Recent History -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <h3 class="mb-3">Recent Borrowing History</h3>
-            <div class="card">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Book Title</th>
-                                <th>Author</th>
-                                <th>Borrow Date</th>
-                                <th>Due Date</th>
-                                <th>Return Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if recent_history %}
-                                {% for item in recent_history %}
-                                <tr>
-                                    <td>{{ item['title'] }}</td>
-                                    <td>{{ item['author'] }}</td>
-                                    <td>{{ item['borrow_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
-                                    <td>{{ item['due_date']|parse_dt|strftime('%Y-%m-%d') if item['due_date'] else 'N/A' }}</td>
-                                    <td>{{ item['return_date']|parse_dt|strftime('%Y-%m-%d') if item['return_date'] else 'N/A' }}</td>
-                                    <td>
-                                        {% if item['status'] == 'borrowed' %}
-                                        <span class="badge bg-info">Borrowed</span>
-                                        {% elif item['status'] == 'returned' %}
-                                        <span class="badge bg-success">Returned</span>
-                                        {% else %}
-                                        <span class="badge bg-secondary">{{ item['status'] }}</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">No history yet</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
+        <div class="glass-card">
+          <div class="section-header">
+            <div>
+              <h2>Recent activity</h2>
+              <p>Your latest borrow and return updates.</p>
+            </div>
+          </div>
+
+          {% if recent_history %}
+            <div class="activity-list">
+              {% for record in recent_history %}
+                <div class="activity-row">
+                  <div class="activity-icon"><i class="fas {{ 'fa-book' if record.status == 'borrowed' else 'fa-undo' }}"></i></div>
+                  <div>
+                    <h3>{{ record.title }}</h3>
+                    <p>{{ record.status|capitalize }} • {{ (record.borrow_date|parse_dt).strftime('%b %d, %Y') if record.borrow_date else 'Recently' }}</p>
+                  </div>
+                  <span class="status-pill {{ record.status }}">{{ record.status }}</span>
                 </div>
+              {% endfor %}
             </div>
-            <div class="mt-3">
-                <a href="{{ url_for('history') }}" class="btn btn-primary">View Full History</a>
-            </div>
+          {% else %}
+            <div class="empty-state">No recent activity yet. Your borrow history will appear here as you start using the library.</div>
+          {% endif %}
         </div>
+      </div>
     </div>
+  </div>
 </div>
-
-<script>
-// Add helper to get current time for comparison
-const now = new Date();
-</script>
 {% endblock %}

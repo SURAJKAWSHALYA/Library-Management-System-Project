@@ -3,117 +3,135 @@
 {% block title %}Manage Users{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="display-5">Manage Users</h1>
+<div class="student-shell">
+  <aside class="sidebar-glass wide-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo"><i class="fas fa-shield-alt"></i> Admin</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Dashboard</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link"><i class="fas fa-home"></i> <span>Overview</span></a>
+      <a href="{{ url_for('admin_users') }}" class="sidebar-link active"><i class="fas fa-users"></i> <span>Users</span></a>
+      <a href="{{ url_for('add_librarian') }}" class="sidebar-link"><i class="fas fa-user-tie"></i> <span>Add Librarian</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Library</div>
+      <a href="{{ url_for('manage_categories') }}" class="sidebar-link"><i class="fas fa-list"></i> <span>Categories</span></a>
+      <a href="{{ url_for('admin_borrowed_books') }}" class="sidebar-link"><i class="fas fa-book"></i> <span>Borrowings</span></a>
+      <a href="{{ url_for('admin_reports') }}" class="sidebar-link"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a href="{{ url_for('settings') }}" class="sidebar-link"><i class="fas fa-cog"></i> <span>Settings</span></a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a>
+    </div>
+  </aside>
+
+  <div class="student-main-area dashboard-bg">
+    <div class="topbar-glass">
+      <div class="topbar-brand">
+        <div class="topbar-badge">USR</div>
+        <div>
+          <div class="topbar-title">Manage users</div>
+          <div class="topbar-caption">Filter by role and manage the platform’s accounts in one place.</div>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ url_for('add_librarian') }}" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> Add Librarian
-            </a>
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
-        </div>
+      </div>
+      <div class="topbar-actions">
+        <a href="{{ url_for('add_librarian') }}" title="Add librarian"><i class="fas fa-user-plus"></i></a>
+        <a href="{{ url_for('settings') }}" title="Settings"><i class="fas fa-cog"></i></a>
+      </div>
     </div>
 
-    <!-- Filter by Role -->
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <div class="btn-group" role="group">
-                <a href="{{ url_for('admin_users', role='') }}" class="btn btn-outline-primary {% if not role_filter %}active{% endif %}">All Users</a>
-                <a href="{{ url_for('admin_users', role='admin') }}" class="btn btn-outline-warning {% if role_filter == 'admin' %}active{% endif %}">Admins</a>
-                <a href="{{ url_for('admin_users', role='librarian') }}" class="btn btn-outline-info {% if role_filter == 'librarian' %}active{% endif %}">Librarians</a>
-                <a href="{{ url_for('admin_users', role='user') }}" class="btn btn-outline-success {% if role_filter == 'user' %}active{% endif %}">Users</a>
-                <a href="{{ url_for('admin_users', role='student') }}" class="btn btn-outline-success {% if role_filter == 'student' %}active{% endif %}">Students</a>
-            </div>
+    <div class="student-page-content">
+      <div class="page-toolbar">
+        <div class="page-heading">
+          <h1>Manage users</h1>
+          <p>View, filter, and control all registered accounts.</p>
         </div>
-    </div>
+        <div class="stats-summary">
+          <div class="summary-chip">{{ users|length }} visible</div>
+        </div>
+      </div>
 
-    <!-- Users Table -->
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Joined</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if users %}
-                        {% for user in users %}
-                        <tr>
-                            <td>#{{ user['id'] }}</td>
-                            <td><strong>{{ user['username'] }}</strong></td>
-                            <td>{{ user['full_name'] }}</td>
-                            <td>{{ user['email'] }}</td>
-                            <td>
-                                {% if user['role'] == 'admin' %}
-                                <span class="badge bg-warning">Admin</span>
-                                {% elif user['role'] == 'librarian' %}
-                                <span class="badge bg-info">Librarian</span>
-                                {% elif user['role'] in ['user', 'student'] %}
-                                <span class="badge bg-success">{{ user['role']|capitalize }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ user['created_at']|parse_dt|strftime('%Y-%m-%d') }}</td>
-                            <td>
-                                {% if user['id'] != user_id %}
-                                <form method="POST" action="{{ url_for('delete_user', user_id=user['id']) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this user?')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </form>
-                                {% else %}
-                                <span class="text-muted small">(Your account)</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">No users found</td>
-                        </tr>
+      <div class="glass-card">
+        <div class="page-toolbar" style="margin-bottom: 0.8rem;">
+          <div class="stats-summary">
+            <a href="{{ url_for('admin_users', role='') }}" class="btn-outline-light {% if not role_filter %}active{% endif %}">All Users</a>
+            <a href="{{ url_for('admin_users', role='admin') }}" class="btn-outline-light {% if role_filter == 'admin' %}active{% endif %}">Admins</a>
+            <a href="{{ url_for('admin_users', role='librarian') }}" class="btn-outline-light {% if role_filter == 'librarian' %}active{% endif %}">Librarians</a>
+            <a href="{{ url_for('admin_users', role='user') }}" class="btn-outline-light {% if role_filter == 'user' %}active{% endif %}">Users</a>
+            <a href="{{ url_for('admin_users', role='student') }}" class="btn-outline-light {% if role_filter == 'student' %}active{% endif %}">Students</a>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if users %}
+                {% for user in users %}
+                <tr>
+                  <td>#{{ user['id'] }}</td>
+                  <td><strong>{{ user['username'] }}</strong></td>
+                  <td>{{ user['full_name'] }}</td>
+                  <td>{{ user['email'] }}</td>
+                  <td>
+                    {% if user['role'] == 'admin' %}
+                    <span class="status-pill warning">Admin</span>
+                    {% elif user['role'] == 'librarian' %}
+                    <span class="status-pill info">Librarian</span>
+                    {% elif user['role'] in ['user', 'student'] %}
+                    <span class="status-pill success">{{ user['role']|capitalize }}</span>
                     {% endif %}
-                </tbody>
-            </table>
+                  </td>
+                  <td>{{ user['created_at']|parse_dt|strftime('%Y-%m-%d') }}</td>
+                  <td>
+                    {% if user['id'] != user_id %}
+                    <form method="POST" action="{{ url_for('delete_user', user_id=user['id']) }}" style="display:inline;">
+                      <button type="submit" class="btn-accent" onclick="return confirm('Delete this user?')">
+                        <i class="fas fa-trash"></i> Delete
+                      </button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted small">(Your account)</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="7" class="text-center text-muted py-4">No users found</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
         </div>
+      </div>
+
+      {% if total_pages > 1 %}
+      <div class="stats-summary" style="justify-content:center; margin-top:1rem;">
+        {% if page > 1 %}
+          <a class="btn-outline-light" href="{{ url_for('admin_users', page=page-1, role=role_filter) }}">Previous</a>
+        {% endif %}
+        {% for page_num in range(1, total_pages + 1) %}
+          <a class="btn-outline-light {% if page_num == page %}active{% endif %}" href="{{ url_for('admin_users', page=page_num, role=role_filter) }}">{{ page_num }}</a>
+        {% endfor %}
+        {% if page < total_pages %}
+          <a class="btn-outline-light" href="{{ url_for('admin_users', page=page+1, role=role_filter) }}">Next</a>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
-
-    <!-- Pagination -->
-    {% if total_pages > 1 %}
-    <nav class="mt-4" aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            {% if page > 1 %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('admin_users', page=page-1, role=role_filter) }}">Previous</a>
-            </li>
-            {% endif %}
-
-            {% for page_num in range(1, total_pages + 1) %}
-                {% if page_num == page %}
-                <li class="page-item active">
-                    <span class="page-link">{{ page_num }}</span>
-                </li>
-                {% else %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ url_for('admin_users', page=page_num, role=role_filter) }}">{{ page_num }}</a>
-                </li>
-                {% endif %}
-            {% endfor %}
-
-            {% if page < total_pages %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('admin_users', page=page+1, role=role_filter) }}">Next</a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
+  </div>
 </div>
 {% endblock %}
