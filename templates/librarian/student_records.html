@@ -3,100 +3,121 @@
 {% block title %}Student Records{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="display-5">Student Records</h1>
+<div class="student-shell">
+  <aside class="sidebar-glass wide-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo"><i class="fas fa-book-reader"></i> Librarian</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Dashboard</div>
+      <a href="{{ url_for('librarian_dashboard') }}" class="sidebar-link"><i class="fas fa-home"></i> <span>Overview</span></a>
+      <a href="{{ url_for('add_book') }}" class="sidebar-link"><i class="fas fa-plus-circle"></i> <span>Add Book</span></a>
+      <a href="{{ url_for('view_books') }}" class="sidebar-link"><i class="fas fa-book"></i> <span>Browse Books</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Operations</div>
+      <a href="{{ url_for('student_records') }}" class="sidebar-link active"><i class="fas fa-users"></i> <span>Student Records</span></a>
+      <a href="{{ url_for('librarian_borrow_requests') }}" class="sidebar-link"><i class="fas fa-envelope-open-text"></i> <span>Borrow Requests</span></a>
+      <a href="{{ url_for('calculate_fines') }}" class="sidebar-link"><i class="fas fa-money-bill"></i> <span>Calculate Fines</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a href="{{ url_for('settings') }}" class="sidebar-link"><i class="fas fa-cog"></i> <span>Settings</span></a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a>
+    </div>
+  </aside>
+
+  <div class="student-main-area dashboard-bg">
+    <div class="topbar-glass">
+      <div class="topbar-brand">
+        <div class="topbar-badge">STD</div>
+        <div>
+          <div class="topbar-title">Student records</div>
+          <div class="topbar-caption">Search student profiles and review current borrowing and fine status.</div>
         </div>
-        <div class="col-md-4">
-            <form method="GET" class="d-flex">
-                <input type="text" name="search" class="form-control" placeholder="Search by name, username, or email" 
-                       value="{{ search }}" required>
-                <button type="submit" class="btn btn-primary ms-2">
-                    <i class="fas fa-search"></i> Search
-                </button>
-                <a href="{{ url_for('librarian_dashboard') }}" class="btn btn-secondary ms-2">Back</a>
-            </form>
-        </div>
+      </div>
+      <div class="topbar-actions">
+        <a href="{{ url_for('librarian_dashboard') }}" title="Dashboard"><i class="fas fa-chart-line"></i></a>
+        <a href="{{ url_for('settings') }}" title="Settings"><i class="fas fa-cog"></i></a>
+      </div>
     </div>
 
-    <!-- Student Records Table -->
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Name</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Currently Borrowed</th>
-                        <th>Pending Fines</th>
-                        <th>Joined</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if student_info %}
-                        {% for info in student_info %}
-                        <tr>
-                            <td><strong>{{ info['student']['full_name'] }}</strong></td>
-                            <td>{{ info['student']['username'] }}</td>
-                            <td>{{ info['student']['email'] }}</td>
-                            <td>
-                                {% if info['borrowed_count'] > 0 %}
-                                <span class="badge bg-info">{{ info['borrowed_count'] }}</span>
-                                {% else %}
-                                <span class="text-muted">None</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if info['fines'] > 0 %}
-                                <span class="badge bg-danger">Rs. {{ "%.2f"|format(info['fines']) }}</span>
-                                {% else %}
-                                <span class="text-success">Clear</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ info['student']['created_at']|parse_dt|strftime('%Y-%m-%d') }}</td>
-                        </tr>
-                        {% endfor %}
+    <div class="student-page-content">
+      <div class="page-toolbar">
+        <div class="page-heading">
+          <h1>Student records</h1>
+          <p>Search by name, username, or email to inspect student activity.</p>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <form method="GET" class="filter-form">
+          <div class="search-field">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" placeholder="Search by name, username, or email" value="{{ search }}" required>
+          </div>
+          <button type="submit" class="btn-accent">Search</button>
+          <a href="{{ url_for('librarian_dashboard') }}" class="btn-outline-light">Back</a>
+        </form>
+
+        <div class="table-shell" style="margin-top:1rem;">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Currently Borrowed</th>
+                <th>Pending Fines</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if student_info %}
+                {% for info in student_info %}
+                <tr>
+                  <td><strong>{{ info['student']['full_name'] }}</strong></td>
+                  <td>{{ info['student']['username'] }}</td>
+                  <td>{{ info['student']['email'] }}</td>
+                  <td>
+                    {% if info['borrowed_count'] > 0 %}
+                    <span class="status-pill info">{{ info['borrowed_count'] }}</span>
                     {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No students found</td>
-                        </tr>
+                    <span class="text-muted">None</span>
                     {% endif %}
-                </tbody>
-            </table>
+                  </td>
+                  <td>
+                    {% if info['fines'] > 0 %}
+                    <span class="status-pill warning">Rs. {{ "%.2f"|format(info['fines']) }}</span>
+                    {% else %}
+                    <span class="status-pill success">Clear</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ info['student']['created_at']|parse_dt|strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No students found</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
         </div>
+      </div>
+
+      {% if total_pages > 1 %}
+      <div class="stats-summary" style="justify-content:center; margin-top:1rem;">
+        {% if page > 1 %}
+          <a class="btn-outline-light" href="{{ url_for('student_records', page=page-1, search=search) }}">Previous</a>
+        {% endif %}
+        {% for page_num in range(1, total_pages + 1) %}
+          <a class="btn-outline-light {% if page_num == page %}active{% endif %}" href="{{ url_for('student_records', page=page_num, search=search) }}">{{ page_num }}</a>
+        {% endfor %}
+        {% if page < total_pages %}
+          <a class="btn-outline-light" href="{{ url_for('student_records', page=page+1, search=search) }}">Next</a>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
-
-    <!-- Pagination -->
-    {% if total_pages > 1 %}
-    <nav class="mt-4" aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            {% if page > 1 %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('student_records', page=page-1, search=search) }}">Previous</a>
-            </li>
-            {% endif %}
-
-            {% for page_num in range(1, total_pages + 1) %}
-                {% if page_num == page %}
-                <li class="page-item active">
-                    <span class="page-link">{{ page_num }}</span>
-                </li>
-                {% else %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ url_for('student_records', page=page_num, search=search) }}">{{ page_num }}</a>
-                </li>
-                {% endif %}
-            {% endfor %}
-
-            {% if page < total_pages %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('student_records', page=page+1, search=search) }}">Next</a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
+  </div>
 </div>
 {% endblock %}

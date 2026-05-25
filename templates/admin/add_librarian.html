@@ -3,46 +3,79 @@
 {% block title %}Add Librarian{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Add New Librarian</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label for="full_name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="full_name" name="full_name" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                            <small class="form-text text-muted">Minimum 6 characters</small>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-user-plus"></i> Add Librarian
-                            </button>
-                            <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+<div class="student-shell">
+  <aside class="sidebar-glass wide-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo"><i class="fas fa-shield-alt"></i> Admin</span>
     </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Dashboard</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link"><i class="fas fa-home"></i> <span>Overview</span></a>
+      <a href="{{ url_for('admin_users') }}" class="sidebar-link"><i class="fas fa-users"></i> <span>Users</span></a>
+      <a href="{{ url_for('add_librarian') }}" class="sidebar-link active"><i class="fas fa-user-tie"></i> <span>Add Librarian</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Library</div>
+      <a href="{{ url_for('manage_categories') }}" class="sidebar-link"><i class="fas fa-list"></i> <span>Categories</span></a>
+      <a href="{{ url_for('admin_borrowed_books') }}" class="sidebar-link"><i class="fas fa-book"></i> <span>Borrowings</span></a>
+      <a href="{{ url_for('admin_reports') }}" class="sidebar-link"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a href="{{ url_for('settings') }}" class="sidebar-link"><i class="fas fa-cog"></i> <span>Settings</span></a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a>
+    </div>
+  </aside>
+
+  <div class="student-main-area dashboard-bg">
+    <div class="topbar-glass">
+      <div class="topbar-brand">
+        <div class="topbar-badge">LIB</div>
+        <div>
+          <div class="topbar-title">Add librarian</div>
+          <div class="topbar-caption">Create a new staff account and grant access to the librarian console.</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <a href="{{ url_for('admin_users') }}" title="Manage users"><i class="fas fa-users"></i></a>
+        <a href="{{ url_for('settings') }}" title="Settings"><i class="fas fa-cog"></i></a>
+      </div>
+    </div>
+
+    <div class="student-page-content">
+      <div class="page-toolbar">
+        <div class="page-heading">
+          <h1>Add new librarian</h1>
+          <p>Use this form to create a new librarian profile.</p>
+        </div>
+      </div>
+
+      <div class="form-shell">
+        <form method="POST">
+          <div class="mb-3">
+            <label for="full_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+            <small class="text-muted">Minimum 6 characters</small>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-accent"><i class="fas fa-user-plus"></i> Add Librarian</button>
+            <a href="{{ url_for('admin_users') }}" class="btn-outline-light">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

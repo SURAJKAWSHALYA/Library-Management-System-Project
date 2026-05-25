@@ -43,9 +43,15 @@
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle"></i> You don't have any borrowed books at this time
                         </div>
+                        {% if session.get('role') != 'librarian' %}
                         <a href="{{ url_for('borrow_book') }}" class="btn btn-primary">
                             <i class="fas fa-book"></i> Borrow a Book
                         </a>
+                        {% else %}
+                        <div class="alert alert-secondary">
+                            <i class="fas fa-info-circle"></i> Borrowing actions are handled from the librarian borrow requests panel.
+                        </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

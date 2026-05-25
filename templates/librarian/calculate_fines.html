@@ -3,94 +3,120 @@
 {% block title %}Calculate Fines{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="display-5">Manage Fines</h1>
+<div class="student-shell">
+  <aside class="sidebar-glass wide-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo"><i class="fas fa-book-reader"></i> Librarian</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Dashboard</div>
+      <a href="{{ url_for('librarian_dashboard') }}" class="sidebar-link"><i class="fas fa-home"></i> <span>Overview</span></a>
+      <a href="{{ url_for('add_book') }}" class="sidebar-link"><i class="fas fa-plus-circle"></i> <span>Add Book</span></a>
+      <a href="{{ url_for('view_books') }}" class="sidebar-link"><i class="fas fa-book"></i> <span>Browse Books</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Operations</div>
+      <a href="{{ url_for('student_records') }}" class="sidebar-link"><i class="fas fa-users"></i> <span>Student Records</span></a>
+      <a href="{{ url_for('librarian_borrow_requests') }}" class="sidebar-link"><i class="fas fa-envelope-open-text"></i> <span>Borrow Requests</span></a>
+      <a href="{{ url_for('calculate_fines') }}" class="sidebar-link active"><i class="fas fa-money-bill"></i> <span>Calculate Fines</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a href="{{ url_for('settings') }}" class="sidebar-link"><i class="fas fa-cog"></i> <span>Settings</span></a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a>
+    </div>
+  </aside>
+
+  <div class="student-main-area dashboard-bg">
+    <div class="topbar-glass">
+      <div class="topbar-brand">
+        <div class="topbar-badge">FIN</div>
+        <div>
+          <div class="topbar-title">Manage fines</div>
+          <div class="topbar-caption">Review overdue books and mark fines as paid once settled.</div>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ url_for('librarian_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
-        </div>
+      </div>
+      <div class="topbar-actions">
+        <a href="{{ url_for('librarian_dashboard') }}" title="Dashboard"><i class="fas fa-chart-line"></i></a>
+        <a href="{{ url_for('settings') }}" title="Settings"><i class="fas fa-cog"></i></a>
+      </div>
     </div>
 
-    {% if fines_by_user %}
+    <div class="student-page-content">
+      <div class="page-toolbar">
+        <div class="page-heading">
+          <h1>Manage fines</h1>
+          <p>Review overdue books, calculate penalties, and mark payments when complete.</p>
+        </div>
+      </div>
+
+      {% if fines_by_user %}
         {% for user_id, user_data in fines_by_user.items() %}
-        <div class="card mb-4">
-            <div class="card-header {% if user_data['total'] > 0 %}bg-warning{% else %}bg-success{% endif %} text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-0">{{ user_data['user_name'] }}</h5>
-                    </div>
-                    <div>
-                        <strong>Total Fines: Rs. {{ "%.2f"|format(user_data['total']) }}</strong>
-                    </div>
-                </div>
+        <div class="glass-card" style="margin-bottom: 1rem;">
+          <div class="section-header">
+            <div>
+              <h2>{{ user_data['user_name'] }}</h2>
+              <p>Total fines: Rs. {{ "%.2f"|format(user_data['total']) }}</p>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Book Title</th>
-                            <th>Due Date</th>
-                            <th>Fine Amount</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for fine in user_data['fines'] %}
-                        <tr>
-                            <td>{{ fine['title'] }}</td>
-                            <td>{{ fine['due_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
-                            <td><strong>Rs. {{ "%.2f"|format(fine['fine_amount']) }}</strong></td>
-                            <td>
-                                {% if fine['paid'] == 0 %}
-                                <span class="badge bg-danger">Pending</span>
-                                {% else %}
-                                <span class="badge bg-success">Paid</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if fine['paid'] == 0 %}
-                                <form method="POST" action="{{ url_for('mark_fine_paid', fine_id=fine['id']) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-success">
-                                        <i class="fas fa-check"></i> Mark Paid
-                                    </button>
-                                </form>
-                                {% else %}
-                                <span class="text-muted small">Settled</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+          </div>
+          <div class="table-shell">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Book Title</th>
+                  <th>Due Date</th>
+                  <th>Fine Amount</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for fine in user_data['fines'] %}
+                <tr>
+                  <td>{{ fine['title'] }}</td>
+                  <td>{{ fine['due_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
+                  <td><strong>Rs. {{ "%.2f"|format(fine['fine_amount']) }}</strong></td>
+                  <td>
+                    {% if fine['paid'] == 0 %}
+                    <span class="status-pill warning">Pending</span>
+                    {% else %}
+                    <span class="status-pill success">Paid</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if fine['paid'] == 0 %}
+                    <form method="POST" action="{{ url_for('mark_fine_paid', fine_id=fine['id']) }}" style="display:inline;">
+                      <button type="submit" class="btn-accent"><i class="fas fa-check"></i> Mark Paid</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted small">Settled</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
         {% endfor %}
-    {% else %}
-        <div class="alert alert-success">
-            <i class="fas fa-check-circle"></i> 
-            <strong>Great!</strong> There are no pending fines at this time.
-        </div>
-    {% endif %}
+      {% else %}
+        <div class="empty-state"><i class="fas fa-check-circle"></i> Great! There are no pending fines at this time.</div>
+      {% endif %}
 
-    <!-- Fine Calculation Notes -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <div class="card bg-light">
-                <div class="card-header">
-                    <h5 class="mb-0">Fine Calculation Information</h5>
-                </div>
-                <div class="card-body">
-                    <ul>
-                        <li><strong>Fine Rate:</strong> Rs. 10 per day of late return</li>
-                        <li><strong>Automatic Calculation:</strong> Fines are calculated automatically when books are overdue</li>
-                        <li><strong>Payment:</strong> Click "Mark Paid" when student pays the fine</li>
-                    </ul>
-                </div>
-            </div>
+      <div class="glass-card" style="margin-top:1rem;">
+        <div class="section-header">
+          <div>
+            <h2>Fine calculation notes</h2>
+            <p>Quick pointers for staff handling overdue books.</p>
+          </div>
         </div>
+        <div class="info-card" style="background: rgba(255,255,255,0.8);">
+          <div class="info-row"><strong>Fine rate</strong><span>Rs. 10 per day of late return</span></div>
+          <div class="info-row"><strong>Automatic calculation</strong><span>Fines are calculated automatically when a book becomes overdue</span></div>
+          <div class="info-row"><strong>Payment</strong><span>Click “Mark Paid” once the student settles the fee</span></div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

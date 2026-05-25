@@ -3,228 +3,180 @@
 {% block title %}Librarian Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="display-4">Librarian Dashboard</h1>
-            <p class="text-muted">Library Operations & Book Management</p>
+<div class="student-shell">
+  <aside class="sidebar-glass wide-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo"><i class="fas fa-book-reader"></i> Librarian</span>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Dashboard</div>
+      <a href="{{ url_for('librarian_dashboard') }}" class="sidebar-link active"><i class="fas fa-home"></i> <span>Overview</span></a>
+      <a href="{{ url_for('add_book') }}" class="sidebar-link"><i class="fas fa-plus-circle"></i> <span>Add Book</span></a>
+      <a href="{{ url_for('view_books') }}" class="sidebar-link"><i class="fas fa-book"></i> <span>Browse Books</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Operations</div>
+      <a href="{{ url_for('student_records') }}" class="sidebar-link"><i class="fas fa-users"></i> <span>Student Records</span></a>
+      <a href="{{ url_for('librarian_borrow_requests') }}" class="sidebar-link"><i class="fas fa-envelope-open-text"></i> <span>Borrow Requests</span></a>
+      <a href="{{ url_for('calculate_fines') }}" class="sidebar-link"><i class="fas fa-money-bill"></i> <span>Calculate Fines</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a href="{{ url_for('settings') }}" class="sidebar-link"><i class="fas fa-cog"></i> <span>Settings</span></a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> <span>Log Out</span></a>
+    </div>
+  </aside>
+
+  <div class="student-main-area dashboard-bg">
+    <div class="topbar-glass">
+      <div class="topbar-brand">
+        <div class="topbar-badge">LIB</div>
+        <div>
+          <div class="topbar-title">Librarian dashboard</div>
+          <div class="topbar-caption">Manage books, borrow requests, fines, and student activity in one place.</div>
         </div>
+      </div>
+      <div class="topbar-actions">
+        <a href="{{ url_for('librarian_borrow_requests') }}" title="Borrow requests"><i class="fas fa-envelope-open-text"></i></a>
+        <a href="{{ url_for('settings') }}" title="Settings"><i class="fas fa-cog"></i></a>
+      </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Total Books</h5>
-                    <h2>{{ total_books }}</h2>
-                    <small>In library</small>
-                </div>
-            </div>
+    <div class="student-page-content">
+      <div class="page-toolbar">
+        <div class="page-heading">
+          <h1>Operations overview</h1>
+          <p>Stay on top of the library’s current circulation and daily staff tasks.</p>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Available Books</h5>
-                    <h2>{{ available_books }}</h2>
-                    <small>Ready to borrow</small>
-                </div>
-            </div>
+        <div class="stats-summary">
+          <div class="summary-chip">{{ total_books }} total books</div>
+          <div class="summary-chip">{{ overdue_books }} overdue</div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Borrowed Books</h5>
-                    <h2>{{ borrowed_books }}</h2>
-                    <small>Currently issued</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Overdue Books</h5>
-                    <h2>{{ overdue_books }}</h2>
-                    <small>Attention needed</small>
-                </div>
-            </div>
-        </div>
-    </div>
+      </div>
 
-    <!-- Librarian Actions -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h3 class="mb-3">Book Management</h3>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-card-label">Total Books</span>
+          <span class="metric-card-value">{{ total_books }}</span>
+          <span class="metric-card-caption">In library</span>
         </div>
-    </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Available Books</span>
+          <span class="metric-card-value">{{ available_books }}</span>
+          <span class="metric-card-caption">Ready to borrow</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-card-label">Overdue Books</span>
+          <span class="metric-card-value">{{ overdue_books }}</span>
+          <span class="metric-card-caption">Attention needed</span>
+        </div>
+      </div>
 
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-plus fa-3x text-success mb-3"></i>
-                    <h5 class="card-title">Add Book</h5>
-                    <p class="card-text small">Add new book to library</p>
-                    <a href="{{ url_for('add_book') }}" class="btn btn-success btn-sm">Add Book</a>
-                </div>
+      <div class="content-grid">
+        <div class="glass-card">
+          <div class="section-header">
+            <div>
+              <h2>Book management</h2>
+              <p>Quick access to the main librarian actions.</p>
             </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-book fa-3x text-primary mb-3"></i>
-                    <h5 class="card-title">Browse Books</h5>
-                    <p class="card-text small">View and edit books</p>
-                    <a href="{{ url_for('view_books') }}" class="btn btn-primary btn-sm">Browse Books</a>
-                </div>
+          </div>
+          <div class="metrics-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <div class="glass-card" style="padding:1rem;">
+              <i class="fas fa-plus-circle fa-2x text-success mb-2"></i>
+              <h3 style="font-size:1rem; margin-bottom:0.35rem;">Add Book</h3>
+              <p class="mb-3" style="color:var(--muted); font-size:0.92rem;">Add a new title to the catalog.</p>
+              <a href="{{ url_for('add_book') }}" class="btn-accent">Open</a>
             </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-3x text-info mb-3"></i>
-                    <h5 class="card-title">Student Records</h5>
-                    <p class="card-text small">View all student accounts</p>
-                    <a href="{{ url_for('student_records') }}" class="btn btn-info btn-sm">Student Records</a>
-                </div>
+            <div class="glass-card" style="padding:1rem;">
+              <i class="fas fa-book fa-2x text-primary mb-2"></i>
+              <h3 style="font-size:1rem; margin-bottom:0.35rem;">Browse Books</h3>
+              <p class="mb-3" style="color:var(--muted); font-size:0.92rem;">Review and edit the current catalog.</p>
+              <a href="{{ url_for('view_books') }}" class="btn-accent">Browse</a>
             </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-money-bill fa-3x text-warning mb-3"></i>
-                    <h5 class="card-title">Calculate Fines</h5>
-                    <p class="card-text small">Manage late fees</p>
-                    <a href="{{ url_for('calculate_fines') }}" class="btn btn-warning btn-sm">Fines</a>
-                </div>
+            <div class="glass-card" style="padding:1rem;">
+              <i class="fas fa-users fa-2x text-info mb-2"></i>
+              <h3 style="font-size:1rem; margin-bottom:0.35rem;">Student Records</h3>
+              <p class="mb-3" style="color:var(--muted); font-size:0.92rem;">Inspect student borrowing status and fines.</p>
+              <a href="{{ url_for('student_records') }}" class="btn-accent">View</a>
             </div>
+            <div class="glass-card" style="padding:1rem;">
+              <i class="fas fa-money-bill fa-2x text-warning mb-2"></i>
+              <h3 style="font-size:1rem; margin-bottom:0.35rem;">Calculate Fines</h3>
+              <p class="mb-3" style="color:var(--muted); font-size:0.92rem;">Review pending late fees and settle them.</p>
+              <a href="{{ url_for('calculate_fines') }}" class="btn-accent">Open</a>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Pending Requests -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="mb-0">Pending Borrow Requests</h3>
-                <a href="{{ url_for('librarian_borrow_requests') }}" class="btn btn-sm btn-primary">View All Requests</a>
-            </div>
-            <div class="card mb-4">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Student</th>
-                                <th>Book Title</th>
-                                <th>Requested Days</th>
-                                <th>Requested On</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if pending_requests %}
-                                {% for item in pending_requests %}
-                                <tr>
-                                    <td><strong>{{ item['full_name'] }}</strong></td>
-                                    <td>{{ item['title'] }}</td>
-                                    <td>{{ ((item['due_date']|parse_dt) - (item['borrow_date']|parse_dt)).days }}</td>
-                                    <td>{{ item['borrow_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
-                                    <td><span class="badge bg-warning">Requested</span></td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">No pending borrow requests</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      <div class="glass-card">
+        <div class="section-header">
+          <div>
+            <h2>Overdue books</h2>
+            <p>Items still awaiting return. Review and process them quickly.</p>
+          </div>
         </div>
-    </div>
+        <div class="table-shell">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Book Title</th>
+                <th>Due Date</th>
+                <th>Days Overdue</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if pending_returns %}
+                {% for item in pending_returns %}
+                <tr>
+                  <td><strong>{{ item['full_name'] }}</strong></td>
+                  <td>{{ item['title'] }}</td>
+                  <td>{{ item['due_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
+                  <td><span class="status-pill warning">{{ "%.0f"|format(((now|as_timestamp) - (item['due_date']|parse_dt|as_timestamp)) / 86400) }} days</span></td>
+                  <td><a href="{{ url_for('return_book') }}" class="btn-outline-light">Process Return</a></td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No overdue books</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-    <!-- Pending Actions -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <h3 class="mb-3">Overdue Books (Pending Returns)</h3>
-            <div class="card">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Student</th>
-                                <th>Book Title</th>
-                                <th>Due Date</th>
-                                <th>Days Overdue</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if pending_returns %}
-                                {% for item in pending_returns %}
-                                <tr class="table-danger">
-                                    <td><strong>{{ item['full_name'] }}</strong></td>
-                                    <td>{{ item['title'] }}</td>
-                                    <td>{{ item['due_date']|parse_dt|strftime('%Y-%m-%d') }}</td>
-                                    <td>
-                                        {% set days_overdue = ((now|as_timestamp) - (item['due_date']|parse_dt|as_timestamp)) / 86400 %}
-                                        <span class="badge bg-danger">{{ "%.0f"|format(days_overdue) }} days</span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ url_for('return_book') }}" class="btn btn-sm btn-outline-primary">Process Return</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">No overdue books</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      <div class="glass-card">
+        <div class="section-header">
+          <div>
+            <h2>Recently added books</h2>
+            <p>Most recent titles added to the catalog.</p>
+          </div>
         </div>
-    </div>
-
-    <!-- Recent Books Added -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <h3 class="mb-3">Recently Added Books</h3>
-            <div class="row">
-                {% if recent_books %}
-                    {% for book in recent_books %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ book['title'] }}</h5>
-                                <p class="card-text text-muted">by {{ book['author'] }}</p>
-                                <div class="mb-2">
-                                    <small><strong>Category:</strong> {{ book['category'] }}</small><br>
-                                    <small><strong>Available:</strong> {{ book['quantity'] }}</small>
-                                </div>
-                                <a href="{{ url_for('edit_book', book_id=book['id']) }}" class="btn btn-sm btn-primary">Edit</a>
-                                <form method="POST" action="{{ url_for('delete_book', book_id=book['id']) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this book?')">Delete</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="col-md-12">
-                        <p class="text-center text-muted">No books added yet</p>
-                    </div>
-                {% endif %}
+        {% if recent_books %}
+        <div class="metrics-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+          {% for book in recent_books %}
+          <div class="glass-card" style="padding:1rem;">
+            <h3 style="font-size:1rem; margin-bottom:0.35rem;">{{ book['title'] }}</h3>
+            <p style="color:var(--muted); font-size:0.92rem; margin-bottom:0.5rem;">by {{ book['author'] }}</p>
+            <div style="color:var(--muted); font-size:0.9rem; margin-bottom:1rem;">
+              <div><strong>Category:</strong> {{ book['category'] }}</div>
+              <div><strong>Available:</strong> {{ book['quantity'] }}</div>
             </div>
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('edit_book', book_id=book['id']) }}" class="btn-accent">Edit</a>
+              <form method="POST" action="{{ url_for('delete_book', book_id=book['id']) }}" style="display:inline;">
+                <button type="submit" class="btn-outline-light" onclick="return confirm('Delete this book?')">Delete</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
         </div>
+        {% else %}
+        <div class="empty-state">No books added yet.</div>
+        {% endif %}
+      </div>
     </div>
+  </div>
 </div>
-
-<script>
-// Helper function for timestamp conversion
-function asTimestamp(dateString) {
-    return new Date(dateString).getTime() / 1000;
-}
-</script>
 {% endblock %}

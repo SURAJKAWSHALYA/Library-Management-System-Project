@@ -413,15 +413,6 @@ def librarian_dashboard():
         WHERE status = "borrowed" AND due_date < CURRENT_TIMESTAMP
     ''').fetchone()['count']
     
-    # Get pending requests
-    pending_requests = db.execute('''
-        SELECT bh.*, b.title, b.author, u.full_name FROM borrow_history bh
-        JOIN books b ON bh.book_id = b.id
-        JOIN users u ON bh.user_id = u.id
-        WHERE bh.status = "requested"
-        ORDER BY bh.borrow_date ASC LIMIT 5
-    ''').fetchall()
-
     # Get pending returns
     pending_returns = db.execute('''
         SELECT bh.*, b.title, u.full_name FROM borrow_history bh
@@ -430,23 +421,22 @@ def librarian_dashboard():
         WHERE bh.status = "borrowed" AND bh.due_date < CURRENT_TIMESTAMP
         ORDER BY bh.due_date ASC LIMIT 5
     ''').fetchall()
-    
+
     # Get recently added books
     recent_books = db.execute('''
         SELECT * FROM books ORDER BY created_at DESC LIMIT 5
     ''').fetchall()
-    
+
     # Get categories
     categories = db.execute('SELECT DISTINCT category FROM books ORDER BY category').fetchall()
-    
+
     db.close()
-    
+
     return render_template('librarian/dashboard.html',
                          total_books=total_books,
                          available_books=available_books,
                          borrowed_books=borrowed_books,
                          overdue_books=overdue_books,
-                         pending_requests=pending_requests,
                          pending_returns=pending_returns,
                          recent_books=recent_books,
                          categories=categories)
@@ -476,7 +466,7 @@ def approve_request(request_id):
     if not request_row:
         db.close()
         flash('Request not found or already processed', 'danger')
-        return redirect(url_for('librarian_borrow_requests'))
+        return redirect(url_for('librarian_dashboard'))
 
     # Allow librarian to override borrow days when approving
     try:
@@ -498,7 +488,7 @@ def approve_request(request_id):
     if not book or book['quantity'] < request_quantity:
         db.close()
         flash('Book is not available in the requested quantity to issue', 'warning')
-        return redirect(url_for('librarian_borrow_requests'))
+        return redirect(url_for('librarian_dashboard'))
 
     # Set new due date relative to now (issue time)
     new_due_date = datetime.now() + timedelta(days=borrow_days)
@@ -509,7 +499,7 @@ def approve_request(request_id):
     db.close()
     log_activity(session['user_id'], 'Approve Request', f'Approved request ID: {request_id} for {request_quantity} copy(ies) of {book["title"]} for {borrow_days} days')
     flash(f'Request approved and book issued for {borrow_days} day(s)', 'success')
-    return redirect(url_for('librarian_borrow_requests'))
+    return redirect(url_for('librarian_dashboard'))
 
 @app.route('/librarian/decline-request/<int:request_id>', methods=['POST'])
 @librarian_required
@@ -519,14 +509,14 @@ def decline_request(request_id):
     if not request_row:
         db.close()
         flash('Request not found or already processed', 'danger')
-        return redirect(url_for('librarian_borrow_requests'))
+        return redirect(url_for('librarian_dashboard'))
 
     db.execute('DELETE FROM borrow_history WHERE id = ?', (request_id,))
     db.commit()
     db.close()
-    log_activity(session['user_id'], 'Decline Request', f'Declined book request ID: {request_id} for {request_row["title"]}')
+    log_activity(session['user_id'], 'Decline Request', f'Declined book request ID: {request_row["title"]}')
     flash('Request declined successfully', 'info')
-    return redirect(url_for('librarian_borrow_requests'))
+    return redirect(url_for('librarian_dashboard'))
 
 @app.route('/student/dashboard')
 @login_required
@@ -868,8 +858,8 @@ def borrow_book():
         db.close()
         log_activity(session['user_id'], 'Borrow Book', f'Borrowed book: {book["title"]}')
         flash(f'Book borrowed successfully! Due date: {due_date.strftime("%Y-%m-%d")}', 'success')
-        return redirect(url_for('dashboard'))
-    
+        return redirect(url_for('librarian_borrow_requests'))
+
     return redirect(url_for('librarian_borrow_requests'))
 
 @app.route('/return-book', methods=['GET', 'POST'])
