@@ -289,15 +289,18 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
-        
+
         if not username or not password:
-            flash('Username and password required', 'danger')
+            flash('Username or email and password are required', 'danger')
             return redirect(url_for('login'))
-        
+
         db = get_db()
-        user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        user = db.execute(
+            'SELECT * FROM users WHERE username = ? OR email = ?',
+            (username, username)
+        ).fetchone()
         db.close()
-        
+
         if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['username'] = user['username']
@@ -306,17 +309,32 @@ def login():
             log_activity(user['id'], 'Login', f'User {username} logged in')
             flash(f'Welcome back, {user["full_name"]}!', 'success')
             return redirect(url_for('dashboard'))
-        
-        flash('Invalid username or password', 'danger')
-    
+
+        flash('Invalid username, email, or password', 'danger')
+
     return render_template('login.html')
+
+@app.route('/auth/<provider>')
+def auth_provider(provider):
+    """Handle alternate sign-in buttons for future provider integration."""
+    allowed = {'google', 'github', 'microsoft'}
+
+    if provider not in allowed:
+        flash('Unknown sign-in provider', 'danger')
+        return redirect(url_for('login'))
+
+    flash(
+        f'{provider.capitalize()} sign-in is coming soon. Please use your email and password for now.',
+        'info'
+    )
+    return redirect(url_for('login'))
 
 @app.route('/logout')
 def logout():
     """User logout"""
     if 'user_id' in session:
         log_activity(session['user_id'], 'Logout', f'User {session["username"]} logged out')
-    
+
     session.clear()
     flash('You have been logged out', 'info')
     return redirect(url_for('login'))
