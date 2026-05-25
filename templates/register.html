@@ -3,88 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Library Management System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Create account - LMS For Student</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body class="auth-body">
-    <div class="auth-container">
-        <div class="auth-card auth-card-register">
-            <div class="auth-header">
-                <div class="auth-logo">
-                    <i class="fas fa-book-reader"></i>
-                </div>
-                <h1>Library Management</h1>
-                <p>Create Your Account</p>
+<body class="bg-[#c2e99d] min-h-screen flex items-center justify-center p-4 sm:p-8">
+
+    <div class="w-full max-w-5xl bg-[#1d3322] rounded-[2.5rem] p-4 sm:p-6 md:p-8 shadow-2xl flex flex-col md:flex-row gap-6 items-stretch min-h-[660px]">
+
+        <div class="flex-1 bg-[#2d5236] rounded-[2rem] relative overflow-hidden flex flex-col items-center justify-between p-8 text-center min-h-[360px] md:min-h-auto">
+            <div class="absolute top-6 left-8 w-10 h-10 border border-white/10 rounded-full flex items-center justify-center text-white/30 text-xs">
+                <i class="fa-regular fa-clock"></i>
             </div>
 
-            <!-- Flash Messages -->
+            <div class="w-full flex-1 flex items-center justify-center my-4 z-10">
+                <img src="{{ url_for('static', filename='images/register-illustration.svg') }}"
+                     alt="Illustration showing a new student creating a library account"
+                     class="w-full max-w-xs md:max-w-sm h-auto object-contain drop-shadow-2xl rounded-[1.75rem] transition-all duration-300">
+            </div>
+
+            <div class="relative z-10 text-white mt-auto">
+                <h2 class="text-2xl font-bold tracking-tight text-[#c2e99d]">Create your LMS account</h2>
+                <p class="text-white/70 text-xs sm:text-sm mt-2 max-w-sm mx-auto leading-relaxed">
+                    Join the library system to access study resources, keep track of borrowed books, and manage your account with ease.
+                </p>
+            </div>
+
+            <div class="absolute bottom-4 right-6 text-[#1d3322]/20 text-7xl hidden sm:block">
+                <i class="fa-solid fa-seedling"></i>
+            </div>
+        </div>
+
+        <div class="flex-1 bg-white rounded-[2rem] p-6 sm:p-10 md:p-12 flex flex-col justify-center">
+            <div class="flex items-center gap-2 text-[#93d259] font-bold text-lg mb-8 justify-center md:justify-start">
+                <div class="w-6 h-6 bg-[#93d259] rounded flex items-center justify-center text-[#1d3322] text-xs">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <span class="text-[#2d5236] text-xs tracking-wider uppercase font-extrabold">Library Management System</span>
+            </div>
+
+            <div class="text-center md:text-start mb-6">
+                <p class="text-sm text-[#2d5236]/70 uppercase tracking-[0.2em] font-semibold mb-2">Get started</p>
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Create your account</h1>
+                <p class="text-sm text-gray-500 mt-2">Fill in your details to register and start using the library portal.</p>
+            </div>
+
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle"></i> {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <div class="mb-4 p-3 rounded-xl {% if category == 'success' %}bg-emerald-50 text-emerald-700 border border-emerald-100{% elif category == 'info' %}bg-sky-50 text-sky-700 border border-sky-100{% else %}bg-red-50 text-red-600 border border-red-100{% endif %} text-xs flex items-center justify-between">
+                            <span class="flex items-center gap-2">
+                                <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'info' %}fa-info-circle{% else %}fa-exclamation-circle{% endif %} text-sm"></i>
+                                {{ message }}
+                            </span>
                         </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
 
-            <form method="POST" class="auth-form">
-                <div class="form-group">
-                    <label for="full_name" class="form-label">Full Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                        <input type="text" class="form-control" id="full_name" name="full_name" required placeholder="Enter your full name">
+            <form method="POST" class="space-y-4">
+                <div>
+                    <label for="full_name" class="block text-xs font-semibold text-gray-600 mb-2">Full name</label>
+                    <input type="text"
+                           id="full_name"
+                           name="full_name"
+                           required
+                           autocomplete="name"
+                           placeholder="Enter your full name"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#93d259]/50 focus:border-[#93d259] placeholder-gray-400 transition-all">
+                </div>
+
+                <div>
+                    <label for="username" class="block text-xs font-semibold text-gray-600 mb-2">Username</label>
+                    <input type="text"
+                           id="username"
+                           name="username"
+                           required
+                           autocomplete="username"
+                           placeholder="Choose a username"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#93d259]/50 focus:border-[#93d259] placeholder-gray-400 transition-all">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-xs font-semibold text-gray-600 mb-2">Email</label>
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           required
+                           autocomplete="email"
+                           placeholder="Enter your email"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#93d259]/50 focus:border-[#93d259] placeholder-gray-400 transition-all">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-xs font-semibold text-gray-600 mb-2">Password</label>
+                    <div class="relative">
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               required
+                               autocomplete="new-password"
+                               placeholder="Minimum 6 characters"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#93d259]/50 focus:border-[#93d259] placeholder-gray-400 transition-all pr-12">
+                        <button type="button"
+                                id="togglePassword"
+                                aria-label="Show or hide password"
+                                class="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 text-sm">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="username" class="form-label">Username</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-at"></i></span>
-                        <input type="text" class="form-control" id="username" name="username" required placeholder="Choose a username">
+                <div>
+                    <label for="confirm_password" class="block text-xs font-semibold text-gray-600 mb-2">Confirm password</label>
+                    <div class="relative">
+                        <input type="password"
+                               id="confirm_password"
+                               name="confirm_password"
+                               required
+                               autocomplete="new-password"
+                               placeholder="Confirm your password"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#93d259]/50 focus:border-[#93d259] placeholder-gray-400 transition-all pr-12">
+                        <button type="button"
+                                id="toggleConfirmPassword"
+                                aria-label="Show or hide confirm password"
+                                class="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 text-sm">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="email" class="form-label">Email</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                        <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                        <input type="password" class="form-control" id="password" name="password" required placeholder="Minimum 6 characters">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirm_password" class="form-label">Confirm Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-login w-100">
-                    <i class="fas fa-user-plus"></i> Register
+                <button type="submit" class="w-full py-3 bg-[#93d259] hover:bg-[#82c04b] text-[#1d3322] font-semibold text-sm rounded-xl tracking-wide transition-colors shadow-sm mt-2">
+                    Create account
                 </button>
             </form>
 
-            <div class="auth-footer">
-                <p>Already have an account? 
-                    <a href="{{ url_for('login') }}" class="text-primary fw-bold">Login here</a>
-                </p>
+            <p class="text-[11px] text-center text-gray-400 mt-6 leading-relaxed">
+                By creating an account you agree to LMS's
+                <a href="#" class="text-[#93d259] font-medium hover:underline">Terms of Service</a>
+                and
+                <a href="#" class="text-[#93d259] font-medium hover:underline">Privacy Policy</a>.
+            </p>
+
+            <div class="text-xs text-center text-gray-500 mt-8">
+                Already have an account?
+                <a href="{{ url_for('login') }}" class="text-[#93d259] font-bold hover:underline ml-1">Sign in</a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const togglePasswordButton = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const toggleConfirmPasswordButton = document.getElementById('toggleConfirmPassword');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+
+        if (togglePasswordButton && passwordInput) {
+            togglePasswordButton.addEventListener('click', () => {
+                const isHidden = passwordInput.type === 'password';
+                passwordInput.type = isHidden ? 'text' : 'password';
+                togglePasswordButton.innerHTML = isHidden
+                    ? '<i class="fa-regular fa-eye-slash"></i>'
+                    : '<i class="fa-regular fa-eye"></i>';
+            });
+        }
+
+        if (toggleConfirmPasswordButton && confirmPasswordInput) {
+            toggleConfirmPasswordButton.addEventListener('click', () => {
+                const isHidden = confirmPasswordInput.type === 'password';
+                confirmPasswordInput.type = isHidden ? 'text' : 'password';
+                toggleConfirmPasswordButton.innerHTML = isHidden
+                    ? '<i class="fa-regular fa-eye-slash"></i>'
+                    : '<i class="fa-regular fa-eye"></i>';
+            });
+        }
+    </script>
 </body>
 </html>
